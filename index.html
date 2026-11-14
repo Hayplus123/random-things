@@ -1,0 +1,342 @@
+html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tank Duel - 2 Player</title>
+<style>
+  :root { --bg:#111; --p1:#00ffff; --p2:#ff3366; --wall:#444; --ui:#eee; }
+  * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
+  body { background:var(--bg); color:var(--ui); font-family:'Segoe UI', sans-serif; display:flex; flex-direction:column; align-items:center; min-height:100vh; overflow:hidden; }
+  h1 { margin:10px 0 5px; font-size:1.5rem; letter-spacing:2px; text-shadow:0 0 10px var(--p1); }
+  .subtitle { color:#888; font-size:0.8rem; margin-bottom:10px; }
+  canvas { border:4px solid #333; border-radius:8px; box-shadow:0 0 30px rgba(0,0,0,0.5), 0 0 10px var(--p1); background:#0a0a0a; display:block; }
+  .hud { display:flex; justify-content:space-between; width:800px; margin-top:10px; padding:0 10px; font-size:0.9rem; }
+  .health-bar { width:300px; height:18px; background:#222; border:2px solid #444; border-radius:9px; overflow:hidden; position:relative; box-shadow:inset 0 0 5px #000; }
+  .health-fill { height:100%; transition:width 0.2s ease; border-radius:7px; }
+  #p1Health { background:linear-gradient(90deg, #00aaaa, #00ffff); box-shadow:0 0 10px var(--p1); }
+  #p2Health { background:linear-gradient(90deg, #aa0033, #ff3366); box-shadow:0 0 10px var(--p2); }
+  .label { position:absolute; width:100%; text-align:center; line-height:18px; font-weight:bold; text-shadow:0 0 3px #000; z-index:1; pointer-events:none; }
+  #winnerOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); display:none; flex-direction:column; align-items:center; justify-content:center; z-index:100; gap:20px; }
+  #winnerText { font-size:3rem; font-weight:bold; text-shadow:0 0 20px currentColor; animation:pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  @keyframes pop { 0%{transform:scale(0);opacity:0} 100%{transform:scale(1);opacity:1} }
+  button { padding:15px 40px; font-size:1.2rem; background:linear-gradient(45deg, #222, #333); color:#fff; border:2px solid #555; border-radius:50px; cursor:pointer; transition:all 0.2s; font-family:inherit; letter-spacing:1px; }
+  button:hover { border-color:var(--p1); box-shadow:0 0 20px var(--p1); transform:scale(1.05); }
+  .controls-info { display:flex; gap:40px; margin-top:10px; font-size:0.75rem; color:#666; text-align:center; flex-wrap:wrap; justify-content:center; }
+  .kbd { background:#222; border:1px solid #444; padding:2px 6px; border-radius:4px; font-family:monospace; color:#aaa; }
+</style>
+</head>
+<body>
+
+<h1>TANK DUEL</h1>
+<div class="subtitle">Last tank standing wins. Walls block shots.</div>
+
+<canvas id="game" width="800" height="600"></canvas>
+
+<div class="hud">
+  <div>
+    <div class="health-bar"><div id="p1Health" class="health-fill" style="width:100%"></div><span class="label">PLAYER 1</span></div>
+  </div>
+  <div style="text-align:center; color:#555;">SCORE <span id="score">0 - 0</span></div>
+  <div style="text-align:right;">
+    <div class="health-bar"><div id="p2Health" class="health-fill" style="width:100%"></div><span class="label">PLAYER 2</span></div>
+  </div>
+</div>
+
+<div class="controls-info">
+  <div><b>P1:</b> <kbd>WASD</kbd> Move &nbsp; <kbd>Mouse</kbd> Aim &nbsp; <kbd>Space / Click</kbd> Shoot</div>
+  <div><b>P2:</b> <kbd>Arrows</kbd> Move &nbsp; <kbd>Num 4/6</kbd> Rotate* &nbsp; <kbd>Enter / R.Ctrl</kbd> Shoot</div>
+</div>
+
+<div id="winnerOverlay">
+  <div id="winnerText">PLAYER 1 WINS</div>
+  <button onclick="resetGame()">REMATCH</button>
+</div>
+
+<script>
+/* ==================== GAME CONSTANTS ==================== */
+const CVS = document.getElementById('game');
+const CTX = CVS.getContext('2d');
+const W = CVS.width, H = CVS.height;
+const FRICTION = 0.96;
+const ACCEL = 0.35;
+const ROT_SPEED = 0.06;
+const BULLET_SPEED = 14;
+const BULLET_COOLDOWN = 350; // ms
+const TANK_RADIUS = 18;
+const TURRET_LEN = 24;
+const MAX_HEALTH = 100;
+const DAMAGE = 15;
+const KNOCKBACK = 6;
+
+/* ==================== STATE ==================== */
+let p1, p2, bullets, walls, keys, mouse, scores, gameRunning, lastTime;
+
+/* ==================== INIT ==================== */
+function resetGame() {
+  document.getElementById('winnerOverlay').style.display = 'none';
+  
+  // Spawn positions
+  p1 = createTank(150, H/2, 0, '#00ffff', '#008888'); // Blue
+  p2 = createTank(W-150, H/2, Math.PI, '#ff3366', '#880022'); // Red
+  
+  bullets = [];
+  keys = {}; mouse = {x:W/2, y:H/2};
+  gameRunning = true;
+  lastTime = performance.now();
+  
+  // Generate Maze Walls
+  walls = generateMaze();
+  
+  requestAnimationFrame(loop);
+}
+
+function createTank(x, y, angle, color, darkColor) {
+  return {
+    x, y, vx:0, vy:0, angle, turretAngle: angle,
+    color, darkColor,
+    health: MAX_HEALTH,
+    cooldown: 0,
+    radius: TANK_RADIUS
+  };
+}
+
+/* ==================== MAZE GENERATION ==================== */
+function generateMaze() {
+  const w = [];
+  const cols = 16, rows = 12;
+  const cw = W/cols, ch = H/rows;
+  const grid = Array.from({length:rows},()=>Array(cols).fill(1)); // 1=wall
+  
+  // Carve paths (Recursive Backtracker)
+  function carve(r,c) {
+    grid[r][c]=0;
+    const dirs=[[0,1],[1,0],[0,-1],[-1,0]].sort(()=>Math.random()-0.5);
+    for(const [dr,dc] of dirs){
+      const nr=r+dr*2, nc=c+dc*2;
+      if(nr>0&&nr<rows-1&&nc>0&&nc<cols-1&&grid[nr][nc]){
+        grid[r+dr][c+dc]=0; carve(nr,nc);
+      }
+    }
+  }
+  carve(1,1);
+  
+  // Convert to rects
+  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) if(grid[r][c]) 
+    w.push({x:c*cw, y:r*ch, w:cw, h:ch, color:`hsl(${200+Math.random()*40}, 30%, ${20+Math.random()*10}%)`});
+  
+  // Add border walls
+  w.push({x:0,y:0,w:W,h:4},{x:0,y:H-4,w:W,h:4},{x:0,y:0,w:4,h:H},{x:W-4,y:0,w:4,h:H});
+  return w;
+}
+
+/* ==================== INPUT ==================== */
+window.addEventListener('keydown', e=>{ keys[e.code]=true; if(e.code==='Space') e.preventDefault(); });
+window.addEventListener('keyup', e=> keys[e.code]=false);
+window.addEventListener('mousemove', e=>{ const r=CVS.getBoundingClientRect(); mouse.x=e.clientX-r.left; mouse.y=e.clientY-r.top; });
+window.addEventListener('mousedown', e=>{ if(e.button===0) keys['MouseLeft']=true; });
+window.addEventListener('mouseup', e=>{ if(e.button===0) keys['MouseLeft']=false; });
+// Prevent context menu on right click for P2 shoot
+window.addEventListener('contextmenu', e=>e.preventDefault());
+
+/* ==================== MAIN LOOP ==================== */
+function loop(ts) {
+  if(!gameRunning) return;
+  const dt = ts - lastTime; lastTime = ts;
+  
+  update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+/* ==================== UPDATE ==================== */
+function update(dt) {
+  // --- P1 Input (WASD + Mouse) ---
+  let ax=0, ay=0;
+  if(keys['KeyW']) ay-=1;
+  if(keys['KeyS']) ay+=1;
+  if(keys['KeyA']) ax-=1;
+  if(keys['KeyD']) ax+=1;
+  moveTank(p1, ax, ay, dt);
+  
+  // Aim at mouse
+  p1.turretAngle = Math.atan2(mouse.y - p1.y, mouse.x - p1.x);
+  
+  // Shoot
+  if((keys['Space'] || keys['MouseLeft']) && p1.cooldown <= 0) {
+    shoot(p1); p1.cooldown = BULLET_COOLDOWN;
+  }
+  p1.cooldown -= dt;
+
+  // --- P2 Input (Arrows + Numpad/Enter) ---
+  ax=0; ay=0;
+  if(keys['ArrowUp']) ay-=1;
+  if(keys['ArrowDown']) ay+=1;
+  if(keys['ArrowLeft']) ax-=1;
+  if(keys['ArrowRight']) ax+=1;
+  moveTank(p2, ax, ay, dt);
+  
+  // Turret Control: Auto-aim at P1 (or Numpad 4/6 for manual)
+  const autoAngle = Math.atan2(p1.y - p2.y, p1.x - p2.x);
+  if(keys['Numpad4']) p2.turretAngle -= ROT_SPEED * (dt/16);
+  else if(keys['Numpad6']) p2.turretAngle += ROT_SPEED * (dt/16);
+  else p2.turretAngle = autoAngle; // Default: Auto-aim
+  
+  // Shoot
+  if((keys['Enter'] || keys['ControlRight']) && p2.cooldown <= 0) {
+    shoot(p2); p2.cooldown = BULLET_COOLDOWN;
+  }
+  p2.cooldown -= dt;
+
+  // --- Bullets ---
+  for(let i=bullets.length-1;i>=0;i--) {
+    const b=bullets[i];
+    b.x += b.vx * (dt/16); b.y += b.vy * (dt/16); b.life -= dt;
+    
+    // Wall collision
+    let hitWall=false;
+    for(const wall of walls) if(rectCircleCollide(wall, b)) { hitWall=true; break; }
+    if(hitWall || b.life<=0 || b.x<0||b.x>W||b.y<0||b.y>H) { bullets.splice(i,1); continue; }
+    
+    // Tank collision
+    const target = b.owner===p1 ? p2 : p1;
+    if(circleCollide(b, target)) {
+      target.health -= DAMAGE;
+      // Knockback
+      const ang = Math.atan2(target.y - b.y, target.x - b.x);
+      target.vx += Math.cos(ang) * KNOCKBACK;
+      target.vy += Math.sin(ang) * KNOCKBACK;
+      bullets.splice(i,1);
+      updateHUD();
+      if(target.health <= 0) endGame(b.owner);
+    }
+  }
+}
+
+function moveTank(t, ax, ay, dt) {
+  if(ax!==0 || ay!==0) {
+    const mag = Math.hypot(ax,ay);
+    t.vx += (ax/mag) * ACCEL * (dt/16);
+    t.vy += (ay/mag) * ACCEL * (dt/16);
+  }
+  t.vx *= FRICTION; t.vy *= FRICTION;
+  t.x += t.vx * (dt/16); t.y += t.vy * (dt/16);
+  
+  // Wall Collision Response (Slide)
+  for(const wall of walls) resolveWallCollision(t, wall);
+  // Screen Bounds
+  t.x = Math.max(t.radius, Math.min(W-t.radius, t.x));
+  t.y = Math.max(t.radius, Math.min(H-t.radius, t.y));
+}
+
+function shoot(tank) {
+  bullets.push({
+    x: tank.x + Math.cos(tank.turretAngle) * (TANK_RADIUS+2),
+    y: tank.y + Math.sin(tank.turretAngle) * (TANK_RADIUS+2),
+    vx: Math.cos(tank.turretAngle) * BULLET_SPEED,
+    vy: Math.sin(tank.turretAngle) * BULLET_SPEED,
+    radius: 4, life: 2000, owner: tank, color: tank.color
+  });
+}
+
+/* ==================== COLLISION HELPERS ==================== */
+function circleCollide(a,b){ return Math.hypot(a.x-b.x, a.y-b.y) < a.radius+b.radius; }
+function rectCircleCollide(r, c) {
+  const nx = Math.max(r.x, Math.min(c.x, r.x+r.w));
+  const ny = Math.max(r.y, Math.min(c.y, r.y+r.h));
+  return Math.hypot(c.x-nx, c.y-ny) < c.radius;
+}
+function resolveWallCollision(t, w) {
+  // Find closest point on rect to circle center
+  const cx = Math.max(w.x, Math.min(t.x, w.x+w.w));
+  const cy = Math.max(w.y, Math.min(t.y, w.y+w.h));
+  const dx = t.x - cx; const dy = t.y - cy;
+  const dist = Math.hypot(dx, dy);
+  if(dist < t.radius && dist > 0.01) {
+    const overlap = t.radius - dist;
+    t.x += (dx/dist) * overlap;
+    t.y += (dy/dist) * overlap;
+    // Kill velocity into wall
+    const nx = dx/dist, ny = dy/dist;
+    const dot = t.vx*nx + t.vy*ny;
+    if(dot < 0) { t.vx -= dot*nx; t.vy -= dot*ny; }
+  }
+}
+
+/* ==================== DRAW ==================== */
+function draw() {
+  CTX.clearRect(0,0,W,H);
+  
+  // Grid bg
+  CTX.strokeStyle='#1a1a1a'; CTX.lineWidth=1;
+  for(let i=0;i<W;i+=40){ CTX.beginPath(); CTX.moveTo(i,0); CTX.lineTo(i,H); CTX.stroke(); }
+  for(let i=0;i<H;i+=40){ CTX.beginPath(); CTX.moveTo(0,i); CTX.lineTo(W,i); CTX.stroke(); }
+
+  // Walls
+  for(const w of walls) {
+    CTX.fillStyle = w.color;
+    CTX.fillRect(w.x, w.y, w.w, w.h);
+    CTX.strokeStyle = '#222'; CTX.strokeRect(w.x, w.y, w.w, w.h);
+  }
+
+  // Bullets
+  for(const b of bullets) {
+    CTX.fillStyle = b.color;
+    CTX.shadowColor = b.color; CTX.shadowBlur = 10;
+    CTX.beginPath(); CTX.arc(b.x, b.y, b.radius, 0, Math.PI*2); CTX.fill();
+    CTX.shadowBlur = 0;
+  }
+
+  // Tanks
+  drawTank(p1); drawTank(p2);
+}
+
+function drawTank(t) {
+  CTX.save(); CTX.translate(t.x, t.y);
+  
+  // Body
+  CTX.rotate(t.angle);
+  const grad = CTX.createRadialGradient(0,0,0, 0,0,t.radius);
+  grad.addColorStop(0, t.color); grad.addColorStop(1, t.darkColor);
+  CTX.fillStyle = grad;
+  CTX.beginPath(); CTX.arc(0,0,t.radius,0,Math.PI*2); CTX.fill();
+  // Treads
+  CTX.fillStyle = t.darkColor;
+  CTX.fillRect(-t.radius-2, -t.radius*0.7, t.radius*2+4, t.radius*0.5);
+  CTX.fillRect(-t.radius-2, t.radius*0.2, t.radius*2+4, t.radius*0.5);
+  
+  CTX.restore();
+  
+  // Turret (Draw on top, no body rotation)
+  CTX.save(); CTX.translate(t.x, t.y); CTX.rotate(t.turretAngle);
+  CTX.fillStyle = t.color;
+  CTX.fillRect(-3, -3, TURRET_LEN, 6);
+  CTX.fillStyle = t.darkColor;
+  CTX.beginPath(); CTX.arc(0,0,8,0,Math.PI*2); CTX.fill(); // Base
+  CTX.restore();
+}
+
+/* ==================== UI / GAME FLOW ==================== */
+function updateHUD() {
+  document.getElementById('p1Health').style.width = Math.max(0, p1.health) + '%';
+  document.getElementById('p2Health').style.width = Math.max(0, p2.health) + '%';
+}
+
+function endGame(winner) {
+  gameRunning = false;
+  const isP1 = winner === p1;
+  if(isP1) scores.p1++; else scores.p2++;
+  
+  document.getElementById('winnerText').textContent = isP1 ? 'PLAYER 1 WINS' : 'PLAYER 2 WINS';
+  document.getElementById('winnerText').style.color = isP1 ? '#00ffff' : '#ff3366';
+  document.getElementById('score').textContent = `${scores.p1} - ${scores.p2}`;
+  document.getElementById('winnerOverlay').style.display = 'flex';
+}
+
+/* ==================== START ==================== */
+scores = {p1:0, p2:0};
+resetGame();
+</script>
+</body>
+</html>
