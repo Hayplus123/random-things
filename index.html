@@ -59,6 +59,9 @@
             <p>Level: <span id="character-level">1</span></p>
             <p>Experience: <span id="character-experience">0</span></p>
             <p>Gold: <span id="character-gold">0</span></p>
+            <p>Strength: <span id="character-strength">1</span></p>
+            <p>Agility: <span id="character-agility">1</span></p>
+            <p>Intelligence: <span id="character-intelligence">1</span></p>
         </div>
         <div id="skill-tree">
             <h2>Skill Tree</h2>
@@ -66,6 +69,8 @@
                 <li><button id="strength-skill">Strength +1</button></li>
                 <li><button id="agility-skill">Agility +1</button></li>
                 <li><button id="intelligence-skill">Intelligence +1</button></li>
+                <li><button id="health-skill">Health +10</button></li>
+                <li><button id="mana-skill">Mana +10</button></li>
             </ul>
         </div>
         <div id="equipment">
@@ -74,6 +79,8 @@
                 <li><button id="sword-equipment">Sword</button></li>
                 <li><button id="shield-equipment">Shield</button></li>
                 <li><button id="armor-equipment">Armor</button></li>
+                <li><button id="boots-equipment">Boots</button></li>
+                <li><button id="gloves-equipment">Gloves</button></li>
             </ul>
         </div>
         <div id="combat">
@@ -82,6 +89,25 @@
             <button id="defend-button">Defend</button>
             <p>Enemy Health: <span id="enemy-health">100</span></p>
             <p>Player Health: <span id="player-health">100</span></p>
+            <p>Player Mana: <span id="player-mana">100</span></p>
+        </div>
+        <div id="inventory">
+            <h2>Inventory</h2>
+            <ul>
+                <li><button id="health-potion">Health Potion</button></li>
+                <li><button id="mana-potion">Mana Potion</button></li>
+                <li><button id="gold-potion">Gold Potion</button></li>
+            </ul>
+        </div>
+        <div id="shop">
+            <h2>Shop</h2>
+            <ul>
+                <li><button id="buy-sword">Buy Sword</button></li>
+                <li><button id="buy-shield">Buy Shield</button></li>
+                <li><button id="buy-armor">Buy Armor</button></li>
+                <li><button id="buy-boots">Buy Boots</button></li>
+                <li><button id="buy-gloves">Buy Gloves</button></li>
+            </ul>
         </div>
     </div>
     <script>
@@ -92,22 +118,34 @@
         let strength = 1;
         let agility = 1;
         let intelligence = 1;
+        let health = 100;
+        let mana = 100;
         let sword = false;
         let shield = false;
         let armor = false;
+        let boots = false;
+        let gloves = false;
         let enemyHealth = 100;
         let playerHealth = 100;
+        let playerMana = 100;
 
         document.getElementById('character-name').innerHTML = characterName;
         document.getElementById('character-level').innerHTML = characterLevel;
         document.getElementById('character-experience').innerHTML = characterExperience;
         document.getElementById('character-gold').innerHTML = characterGold;
+        document.getElementById('character-strength').innerHTML = strength;
+        document.getElementById('character-agility').innerHTML = agility;
+        document.getElementById('character-intelligence').innerHTML = intelligence;
+        document.getElementById('player-health').innerHTML = playerHealth;
+        document.getElementById('player-mana').innerHTML = playerMana;
+        document.getElementById('enemy-health').innerHTML = enemyHealth;
 
         document.getElementById('strength-skill').addEventListener('click', () => {
             if (characterGold >= 10) {
                 characterGold -= 10;
                 strength++;
                 document.getElementById('character-gold').innerHTML = characterGold;
+                document.getElementById('character-strength').innerHTML = strength;
             }
         });
 
@@ -116,6 +154,7 @@
                 characterGold -= 10;
                 agility++;
                 document.getElementById('character-gold').innerHTML = characterGold;
+                document.getElementById('character-agility').innerHTML = agility;
             }
         });
 
@@ -124,6 +163,25 @@
                 characterGold -= 10;
                 intelligence++;
                 document.getElementById('character-gold').innerHTML = characterGold;
+                document.getElementById('character-intelligence').innerHTML = intelligence;
+            }
+        });
+
+        document.getElementById('health-skill').addEventListener('click', () => {
+            if (characterGold >= 10) {
+                characterGold -= 10;
+                health += 10;
+                document.getElementById('character-gold').innerHTML = characterGold;
+                document.getElementById('player-health').innerHTML = health;
+            }
+        });
+
+        document.getElementById('mana-skill').addEventListener('click', () => {
+            if (characterGold >= 10) {
+                characterGold -= 10;
+                mana += 10;
+                document.getElementById('character-gold').innerHTML = characterGold;
+                document.getElementById('player-mana').innerHTML = mana;
             }
         });
 
@@ -147,6 +205,22 @@
             if (characterGold >= 50) {
                 characterGold -= 50;
                 armor = true;
+                document.getElementById('character-gold').innerHTML = characterGold;
+            }
+        });
+
+        document.getElementById('boots-equipment').addEventListener('click', () => {
+            if (characterGold >= 50) {
+                characterGold -= 50;
+                boots = true;
+                document.getElementById('character-gold').innerHTML = characterGold;
+            }
+        });
+
+        document.getElementById('gloves-equipment').addEventListener('click', () => {
+            if (characterGold >= 50) {
+                characterGold -= 50;
+                gloves = true;
                 document.getElementById('character-gold').innerHTML = characterGold;
             }
         });
@@ -181,6 +255,72 @@
             }
         });
 
+        document.getElementById('health-potion').addEventListener('click', () => {
+            if (characterGold >= 10) {
+                characterGold -= 10;
+                health += 10;
+                document.getElementById('character-gold').innerHTML = characterGold;
+                document.getElementById('player-health').innerHTML = health;
+            }
+        });
+
+        document.getElementById('mana-potion').addEventListener('click', () => {
+            if (characterGold >= 10) {
+                characterGold -= 10;
+                mana += 10;
+                document.getElementById('character-gold').innerHTML = characterGold;
+                document.getElementById('player-mana').innerHTML = mana;
+            }
+        });
+
+        document.getElementById('gold-potion').addEventListener('click', () => {
+            if (characterGold >= 10) {
+                characterGold -= 10;
+                characterGold += 50;
+                document.getElementById('character-gold').innerHTML = characterGold;
+            }
+        });
+
+        document.getElementById('buy-sword').addEventListener('click', () => {
+            if (characterGold >= 50) {
+                characterGold -= 50;
+                sword = true;
+                document.getElementById('character-gold').innerHTML = characterGold;
+            }
+        });
+
+        document.getElementById('buy-shield').addEventListener('click', () => {
+            if (characterGold >= 50) {
+                characterGold -= 50;
+                shield = true;
+                document.getElementById('character-gold').innerHTML = characterGold;
+            }
+        });
+
+        document.getElementById('buy-armor').addEventListener('click', () => {
+            if (characterGold >= 50) {
+                characterGold -= 50;
+                armor = true;
+                document.getElementById('character-gold').innerHTML = characterGold;
+            }
+        });
+
+        document.getElementById('buy-boots').addEventListener('click', () => {
+            if (characterGold >= 50) {
+                characterGold -= 50;
+                boots = true;
+                document.getElementById('character-gold').innerHTML = characterGold;
+            }
+        });
+
+        document.getElementById('buy-gloves').addEventListener('click', () => {
+            if (characterGold >= 50) {
+                characterGold -= 50;
+                gloves = true;
+                document.getElementById('character-gold').innerHTML = characterGold;
+            }
+        });
+
         setInterval(() => {
             characterExperience += 1;
             document.getElementById('character-experience').innerHTML = characterExperience;
@@ -210,6 +350,88 @@
                 alert('Game Over!');
             }
         }, 1000);
+
+        setInterval(() => {
+            playerMana -= 1;
+            document.getElementById('player-mana').innerHTML = playerMana;
+            if (playerMana <= 0) {
+                playerMana = 0;
+                document.getElementById('player-mana').innerHTML = playerMana;
+                alert('Mana Depleted!');
+            }
+        }, 1000);
+
+        function levelUp() {
+            characterLevel++;
+            characterExperience = 0;
+            document.getElementById('character-level').innerHTML = characterLevel;
+            document.getElementById('character-experience').innerHTML = characterExperience;
+        }
+
+        function buyEquipment(equipment) {
+            if (characterGold >= 50) {
+                characterGold -= 50;
+                document.getElementById('character-gold').innerHTML = characterGold;
+                if (equipment === 'sword') {
+                    sword = true;
+                } else if (equipment === 'shield') {
+                    shield = true;
+                } else if (equipment === 'armor') {
+                    armor = true;
+                } else if (equipment === 'boots') {
+                    boots = true;
+                } else if (equipment === 'gloves') {
+                    gloves = true;
+                }
+            }
+        }
+
+        function usePotion(potion) {
+            if (characterGold >= 10) {
+                characterGold -= 10;
+                document.getElementById('character-gold').innerHTML = characterGold;
+                if (potion === 'health') {
+                    health += 10;
+                    document.getElementById('player-health').innerHTML = health;
+                } else if (potion === 'mana') {
+                    mana += 10;
+                    document.getElementById('player-mana').innerHTML = mana;
+                } else if (potion === 'gold') {
+                    characterGold += 50;
+                    document.getElementById('character-gold').innerHTML = characterGold;
+                }
+            }
+        }
+
+        function attack() {
+            let damage = strength * 2;
+            if (sword) {
+                damage *= 1.5;
+            }
+            enemyHealth -= damage;
+            document.getElementById('enemy-health').innerHTML = enemyHealth;
+            if (enemyHealth <= 0) {
+                characterExperience += 100;
+                characterGold += 50;
+                document.getElementById('character-experience').innerHTML = characterExperience;
+                document.getElementById('character-gold').innerHTML = characterGold;
+                enemyHealth = 100;
+                document.getElementById('enemy-health').innerHTML = enemyHealth;
+            }
+        }
+
+        function defend() {
+            let defense = agility * 2;
+            if (shield) {
+                defense *= 1.5;
+            }
+            playerHealth += defense;
+            document.getElementById('player-health').innerHTML = playerHealth;
+            if (playerHealth > 100) {
+                playerHealth = 100;
+                document.getElementById('player-health').innerHTML = playerHealth;
+            }
+        }
     </script>
 </body>
 </html>
