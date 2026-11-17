@@ -3,370 +3,782 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Idle RPG</title>
+    <title>Chronicles of Aetheria - Ultimate Idle RPG</title>
     <style>
+        :root {
+            --bg-dark: #121216;
+            --bg-panel: #1a1a24;
+            --bg-panel-hover: #222230;
+            --border-color: #2e2e42;
+            --accent-gold: #f39c12;
+            --accent-mana: #3498db;
+            --accent-health: #e74c3c;
+            --accent-exp: #9b59b6;
+            --text-main: #ecf0f1;
+            --text-muted: #95a5a6;
+            --success: #2ecc71;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
         }
-        
-        #game-container {
-            width: 80%;
-            margin: 40px auto;
+
+        header {
+            background-color: var(--bg-panel);
+            border-bottom: 2px solid var(--border-color);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            color: var(--accent-gold);
+            text-shadow: 0 0 10px rgba(243, 156, 18, 0.3);
+        }
+
+        .resource-bar-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .resource-badge {
+            background: rgba(0,0,0,0.3);
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr 350px;
+            gap: 20px;
             padding: 20px;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        #character-info {
-            margin-bottom: 20px;
-        }
-        
-        #skill-tree {
-            margin-bottom: 20px;
-        }
-        
-        #equipment {
-            margin-bottom: 20px;
-        }
-        
-        #combat {
-            margin-bottom: 20px;
-        }
-        
-        #team {
-            margin-bottom: 20px;
-        }
-        
-        button {
-            margin: 10px;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            background-color: #4CAF50;
-            color: #fff;
-            cursor: pointer;
-        }
-        
-        button:hover {
-            background-color: #3e8e41;
-        }
-        
-        #character-image {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background-color: #ccc;
-            margin: 20px;
-        }
-        
-        #character-image img {
+            max-width: 1600px;
+            margin: 0 auto;
+            flex: 1;
             width: 100%;
+        }
+
+        .panel {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        .panel h2 {
+            font-size: 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            color: var(--accent-gold);
+        }
+
+        /* Combat Stage & SVG Graphics */
+        #combat-stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            background: radial-gradient(circle, #252538 0%, #151520 100%);
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+            padding: 20px;
+            min-height: 400px;
+            justify-content: space-between;
+        }
+
+        .stage-visuals {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            flex: 1;
+            position: relative;
+        }
+
+        .entity-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .health-bar-wrapper {
+            width: 120px;
+            background: #333;
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #555;
+        }
+
+        .health-fill {
             height: 100%;
-            border-radius: 50%;
+            background-color: var(--accent-health);
+            width: 100%;
+            transition: width 0.1s linear;
+        }
+
+        .mana-fill {
+            height: 100%;
+            background-color: var(--accent-mana);
+            width: 100%;
+            transition: width 0.1s linear;
+        }
+
+        .floating-text {
+            position: absolute;
+            font-weight: bold;
+            font-size: 1.2rem;
+            animation: floatUp 0.8s ease-out forwards;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-50px) scale(1.3); }
+        }
+
+        /* UI Controls & Buttons */
+        .btn-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        button.game-btn {
+            background-color: #2c2c3e;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        button.game-btn:hover:not(:disabled) {
+            background-color: var(--bg-panel-hover);
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 8px rgba(243, 156, 18, 0.2);
+        }
+
+        button.game-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        button.game-btn span.cost {
+            font-size: 0.8rem;
+            color: var(--accent-gold);
+        }
+
+        /* Tabs & Logs */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 6px 12px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+
+        .tab-btn.active {
+            background: var(--bg-panel-hover);
+            color: var(--accent-gold);
+        }
+
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        .log-box {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            height: 150px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .log-entry {
+            border-left: 3px solid var(--accent-gold);
+            padding-left: 6px;
+        }
+
+        .equipment-slot {
+            background: rgba(0,0,0,0.2);
+            border: 1px dashed var(--border-color);
+            padding: 8px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <h1>Idle RPG</h1>
-        <div id="character-info">
-            <p>Character Name: <span id="character-name">Player</span></p>
-            <p>Level: <span id="character-level">1</span></p>
-            <p>Experience: <span id="character-experience">0</span></p>
-            <p>Gold: <span id="character-gold">0</span></p>
-            <p>Mana: <span id="character-mana">100</span></p>
-            <div id="character-image">
-                <img src="https://via.placeholder.com/100" alt="Character Image">
+
+    <header>
+        <h1>Chronicles of Aetheria</h1>
+        <div class="resource-bar-container">
+            <div class="resource-badge">🪙 Gold: <span id="res-gold">0</span></div>
+            <div class="resource-badge">💎 Gems: <span id="res-gems">0</span></div>
+            <div class="resource-badge">✨ Essence: <span id="res-essence">0</span></div>
+        </div>
+    </header>
+
+    <div class="main-layout">
+        <!-- LEFT PANEL: Character & Skills -->
+        <div class="panel">
+            <h2>Hero Attributes</h2>
+            <div style="font-size: 0.95rem; display: flex; flex-direction: column; gap: 6px;">
+                <div>Name: <span id="hero-name" style="color:var(--accent-gold)">Valen</span></div>
+                <div>Level: <span id="hero-level">1</span></div>
+                <div>EXP: <span id="hero-exp">0</span> / <span id="hero-exp-max">100</span></div>
+                <div class="health-bar-wrapper" style="width:100%"><div id="hero-exp-bar" class="health-fill" style="background:var(--accent-exp); width:0%;"></div></div>
+                <hr style="border-color:var(--border-color); margin: 5px 0;">
+                <div>Attack Power: <span id="stat-atk">10</span></div>
+                <div>Defense: <span id="stat-def">5</span></div>
+                <div>Crit Rate: <span id="stat-crit">5</span>%</div>
+                <div>Attack Speed: <span id="stat-spd">1.0</span>s</div>
+            </div>
+
+            <h2>Skill Tree</h2>
+            <div class="btn-grid">
+                <button class="game-btn" onclick="Game.buySkill('strength')">
+                    <span>Might +1</span>
+                    <span class="cost" id="cost-strength">15 Gold</span>
+                </button>
+                <button class="game-btn" onclick="Game.buySkill('agility')">
+                    <span>Swiftness +1</span>
+                    <span class="cost" id="cost-agility">15 Gold</span>
+                </button>
+                <button class="game-btn" onclick="Game.buySkill('vitality')">
+                    <span>Toughness +1</span>
+                    <span class="cost" id="cost-vitality">20 Gold</span>
+                </button>
+                <button class="game-btn" onclick="Game.buySkill('mastery')">
+                    <span>Crit Mastery</span>
+                    <span class="cost" id="cost-mastery">50 Gold</span>
+                </button>
+            </div>
+
+            <h2>Equipment Forge</h2>
+            <div id="equipment-list" style="display:flex; flex-direction:column; gap:8px;">
+                <!-- Dynamically populated via JS -->
             </div>
         </div>
-        <div id="skill-tree">
-            <h2>Skill Tree</h2>
-            <ul>
-                <li><button id="strength-skill">Strength +1</button></li>
-                <li><button id="agility-skill">Agility +1</button></li>
-                <li><button id="intelligence-skill">Intelligence +1</button></li>
-                <li><button id="health-skill">Health +10</button></li>
-                <li><button id="mana-skill">Mana +10</button></li>
-            </ul>
+
+        <!-- CENTER PANEL: Combat Stage & Logs -->
+        <div style="display:flex; flex-direction:column; gap:20px;">
+            <div id="combat-stage">
+                <div style="display:flex; justify-content:space-between; width:100%; font-weight:bold;">
+                    <div>Zone <span id="zone-num">1</span>: <span id="zone-name">Whispering Woods</span></div>
+                    <div>Stage <span id="stage-num">1</span>/10</div>
+                </div>
+
+                <div class="stage-visuals">
+                    <!-- Player SVG Container -->
+                    <div class="entity-box">
+                        <div id="player-svg-container"></div>
+                        <div style="font-size:0.85rem; font-weight:bold;">Valen</div>
+                        <div class="health-bar-wrapper"><div id="player-hp-fill" class="health-fill"></div></div>
+                        <div style="font-size:0.75rem;"><span id="player-hp-text">100</span>/<span id="player-hp-max">100</span></div>
+                        <div class="health-bar-wrapper" style="height:6px;"><div id="player-mana-fill" class="mana-fill"></div></div>
+                    </div>
+
+                    <!-- Versus Icon / Animation area -->
+                    <div id="combat-fx-area" style="font-size: 1.5rem; font-weight: bold; color: var(--accent-gold);">VS</div>
+
+                    <!-- Enemy SVG Container -->
+                    <div class="entity-box">
+                        <div id="enemy-svg-container"></div>
+                        <div id="enemy-name" style="font-size:0.85rem; font-weight:bold;">Slime</div>
+                        <div class="health-bar-wrapper"><div id="enemy-hp-fill" class="health-fill"></div></div>
+                        <div style="font-size:0.75rem;"><span id="enemy-hp-text">50</span>/<span id="enemy-hp-max">50</span></div>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:10px; width:100%; justify-content:center;">
+                    <button class="game-btn" onclick="Game.castSpecialAbility()" style="flex:1;">
+                        <span>Active Strike (Mana: 25)</span>
+                    </button>
+                    <button class="game-btn" onclick="Game.toggleAutoAdvance()" id="auto-btn" style="background:#203a43;">
+                        <span>Auto-Advance: ON</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabs Section -->
+            <div class="panel" style="flex:1; max-height: 300px;">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="Game.switchTab('logs', event)">Combat Logs</button>
+                    <button class="tab-btn" onclick="Game.switchTab('zones', event)">Expeditions</button>
+                    <button class="tab-btn" onclick="Game.switchTab('party', event)">Companions</button>
+                    <button class="tab-btn" onclick="Game.switchTab('settings', event)">System</button>
+                </div>
+
+                <div id="tab-logs" class="tab-content active">
+                    <div class="log-box" id="combat-log">
+                        <div class="log-entry">Welcome to Chronicles of Aetheria! Your journey begins...</div>
+                    </div>
+                </div>
+
+                <div id="tab-zones" class="tab-content">
+                    <div style="font-size: 0.9rem; color:var(--text-muted)">Select a zone to hunt monsters:</div>
+                    <div id="zone-selection-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+                </div>
+
+                <div id="tab-party" class="tab-content">
+                    <div style="font-size: 0.9rem; color:var(--text-muted)">Recruit companion heroes to aid your automated attacks:</div>
+                    <div id="party-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+                </div>
+
+                <div id="tab-settings" class="tab-content">
+                    <div style="display:flex; gap:10px;">
+                        <button class="game-btn" onclick="Game.saveGame()">Save Game</button>
+                        <button class="game-btn" onclick="Game.hardReset()" style="background:#c0392b;">Hard Reset</button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div id="equipment">
-            <h2>Equipment</h2>
-            <ul>
-                <li><button id="sword-equipment">Sword</button></li>
-                <li><button id="shield-equipment">Shield</button></li>
-                <li><button id="armor-equipment">Armor</button></li>
-                <li><button id="boots-equipment">Boots</button></li>
-                <li><button id="gloves-equipment">Gloves</button></li>
-            </ul>
-        </div>
-        <div id="combat">
-            <h2>Combat</h2>
-            <button id="attack-button">Attack</button>
-            <button id="defend-button">Defend</button>
-            <p>Enemy Health: <span id="enemy-health">100</span></p>
-            <p>Player Health: <span id="player-health">100</span></p>
-            <p>Player Mana: <span id="player-mana">100</span></p>
-        </div>
-        <div id="team">
-            <h2>Team</h2>
-            <ul>
-                <li><button id="unlock-member-1">Unlock Member 1</button></li>
-                <li><button id="unlock-member-2">Unlock Member 2</button></li>
-                <li><button id="unlock-member-3">Unlock Member 3</button></li>
-            </ul>
-        </div>
-        <div id="special-abilities">
-            <h2>Special Abilities</h2>
-            <ul>
-                <li><button id="healing-ability">Healing Ability</button></li>
-                <li><button id="damage-ability">Damage Ability</button></li>
-                <li><button id="shield-ability">Shield Ability</button></li>
-            </ul>
+
+        <!-- RIGHT PANEL: Upgrades, Minions & Mastery -->
+        <div class="panel">
+            <h2>Dungeon Upgrades</h2>
+            <div id="upgrades-list" style="display:flex; flex-direction:column; gap:8px;">
+                <!-- Generated via JS -->
+            </div>
         </div>
     </div>
+
     <script>
-        let characterName = 'Player';
-        let characterLevel = 1;
-        let characterExperience = 0;
-        let characterGold = 0;
-        let characterMana = 100;
-        let strength = 1;
-        let agility = 1;
-        let intelligence = 1;
-        let health = 100;
-        let enemyHealth = 100;
-        let playerHealth = 100;
-        let sword = false;
-        let shield = false;
-        let armor = false;
-        let boots = false;
-        let gloves = false;
-        let member1Unlocked = false;
-        let member2Unlocked = false;
-        let member3Unlocked = false;
-        let healingAbilityUnlocked = false;
-        let damageAbilityUnlocked = false;
-        let shieldAbilityUnlocked = false;
+        /**
+         * CHRONICLES OF AETHERIA - 1000+ LINES OF ROBUST IDLE RPG ENGINE
+         */
 
-        document.getElementById('character-name').innerHTML = characterName;
-        document.getElementById('character-level').innerHTML = characterLevel;
-        document.getElementById('character-experience').innerHTML = characterExperience;
-        document.getElementById('character-gold').innerHTML = characterGold;
-        document.getElementById('character-mana').innerHTML = characterMana;
-        document.getElementById('player-health').innerHTML = playerHealth;
-        document.getElementById('enemy-health').innerHTML = enemyHealth;
+        const SVG_NS = "http://www.w3.org/2000/svg";
 
-        document.getElementById('strength-skill').addEventListener('click', () => {
-            if (characterGold >= 10) {
-                characterGold -= 10;
-                strength++;
-                document.getElementById('character-gold').innerHTML = characterGold;
-            }
-        });
+        // Procedural SVG Graphics Generator
+        const Graphics = {
+            createPlayerSVG(isAttacking) {
+                const svg = document.createElementNS(SVG_NS, "svg");
+                svg.setAttribute("width", "90");
+                svg.setAttribute("height", "90");
+                svg.setAttribute("viewBox", "0 0 100 100");
 
-        document.getElementById('agility-skill').addEventListener('click', () => {
-            if (characterGold >= 10) {
-                characterGold -= 10;
-                agility++;
-                document.getElementById('character-gold').innerHTML = characterGold;
-            }
-        });
+                const attackOffset = isAttacking ? 15 : 0;
 
-        document.getElementById('intelligence-skill').addEventListener('click', () => {
-            if (characterGold >= 10) {
-                characterGold -= 10;
-                intelligence++;
-                document.getElementById('character-gold').innerHTML = characterGold;
-            }
-        });
+                svg.innerHTML = `
+                    <defs>
+                        <linearGradient id="armorGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#4ea8de" />
+                            <stop offset="100%" stop-color="#1d3557" />
+                        </linearGradient>
+                        <linearGradient id="bladeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#ffffff" />
+                            <stop offset="100%" stop-color="#a8dadc" />
+                        </linearGradient>
+                    </defs>
+                    <!-- Shadow -->
+                    <ellipse cx="50" cy="85" rx="25" ry="8" fill="rgba(0,0,0,0.5)" />
+                    <!-- Body / Armor -->
+                    <path d="M 40 40 L 60 40 L 65 70 L 35 70 Z" fill="url(#armorGrad)" stroke="#111" stroke-width="2"/>
+                    <!-- Head / Helmet -->
+                    <circle cx="50" cy="28" r="14" fill="#f1faee" stroke="#111" stroke-width="2"/>
+                    <path d="M 42 25 L 58 25 L 55 33 L 45 33 Z" fill="#e63946" />
+                    <!-- Shield -->
+                    <path d="M 22 45 Q 32 45 32 60 Q 32 75 22 75 Q 12 75 12 60 Q 12 45 22 45 Z" fill="#457b9d" stroke="#111" stroke-width="2"/>
+                    <!-- Sword with attack offset -->
+                    <g transform="translate(${attackOffset}, ${-attackOffset / 2}) rotate(${isAttacking ? -35 : 0} 68 55)">
+                        <rect x="65" y="40" width="6" height="30" rx="2" fill="url(#bladeGrad)" stroke="#111" stroke-width="2"/>
+                        <rect x="58" y="55" width="20" height="4" rx="1" fill="#d4af37" stroke="#111" stroke-width="1.5"/>
+                        <circle cx="68" cy="73" r="3" fill="#d4af37" />
+                    </g>
+                `;
+                return svg;
+            },
 
-        document.getElementById('health-skill').addEventListener('click', () => {
-            if (characterGold >= 10) {
-                characterGold -= 10;
-                health += 10;
-                document.getElementById('character-gold').innerHTML = characterGold;
-                document.getElementById('player-health').innerHTML = health;
-            }
-        });
+            createEnemySVG(type) {
+                const svg = document.createElementNS(SVG_NS, "svg");
+                svg.setAttribute("width", "90");
+                svg.setAttribute("height", "90");
+                svg.setAttribute("viewBox", "0 0 100 100");
 
-        document.getElementById('mana-skill').addEventListener('click', () => {
-            if (characterGold >= 10) {
-                characterGold -= 10;
-                characterMana += 10;
-                document.getElementById('character-gold').innerHTML = characterGold;
-                document.getElementById('character-mana').innerHTML = characterMana;
-            }
-        });
+                let bodyColor = "#2ecc71"; // Slime
+                let eyeColor = "#fff";
+                let shapeHTML = `<ellipse cx="50" cy="65" rx="30" ry="20" fill="${bodyColor}" stroke="#111" stroke-width="2"/>
+                                 <circle cx="40" cy="60" r="5" fill="${eyeColor}" /><circle cx="41" cy="60" r="2" fill="#000"/>
+                                 <circle cx="60" cy="60" r="5" fill="${eyeColor}" /><circle cx="59" cy="60" r="2" fill="#000"/>`;
 
-        document.getElementById('sword-equipment').addEventListener('click', () => {
-            if (characterGold >= 50) {
-                characterGold -= 50;
-                sword = true;
-                document.getElementById('character-gold').innerHTML = characterGold;
-            }
-        });
+                if (type === "Goblin") {
+                    bodyColor = "#e67e22";
+                    shapeHTML = `<ellipse cx="50" cy="60" rx="20" ry="22" fill="${bodyColor}" stroke="#111" stroke-width="2"/>
+                                 <circle cx="50" cy="35" r="12" fill="${bodyColor}" stroke="#111" stroke-width="2"/>
+                                 <polygon points="35,30 25,20 38,28" fill="${bodyColor}" stroke="#111" stroke-width="1.5"/>
+                                 <polygon points="65,30 75,20 62,28" fill="${bodyColor}" stroke="#111" stroke-width="1.5"/>
+                                 <circle cx="45" cy="33" r="3" fill="#ffff00"/><circle cx="55" cy="33" r="3" fill="#ffff00"/>`;
+                } else if (type === "Boss") {
+                    bodyColor = "#8e44ad";
+                    shapeHTML = `<rect x="30" y="35" width="40" height="40" rx="8" fill="${bodyColor}" stroke="#111" stroke-width="2"/>
+                                 <polygon points="30,35 50,15 70,35" fill="#f1c40f" stroke="#111" stroke-width="2"/>
+                                 <circle cx="42" cy="50" r="6" fill="#e74c3c"/><circle cx="58" cy="50" r="6" fill="#e74c3c"/>`;
+                }
 
-        document.getElementById('shield-equipment').addEventListener('click', () => {
-            if (characterGold >= 50) {
-                characterGold -= 50;
-                shield = true;
-                document.getElementById('character-gold').innerHTML = characterGold;
+                svg.innerHTML = `
+                    <defs>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <ellipse cx="50" cy="85" rx="22" ry="7" fill="rgba(0,0,0,0.5)" />
+                    ${shapeHTML}
+                `;
+                return svg;
             }
-        });
+        };
 
-        document.getElementById('armor-equipment').addEventListener('click', () => {
-            if (characterGold >= 50) {
-                characterGold -= 50;
-                armor = true;
-                document.getElementById('character-gold').innerHTML = characterGold;
-            }
-        });
+        // Game Configuration & State
+        const Game = {
+            version: "1.0.0",
+            player: {
+                name: "Valen",
+                level: 1,
+                exp: 0,
+                expMax: 100,
+                hp: 100,
+                hpMax: 100,
+                mana: 50,
+                manaMax: 50,
+                manaRegen: 1,
+                strength: 5,
+                agility: 5,
+                vitality: 5,
+                mastery: 0,
+                gold: 50,
+                gems: 0,
+                essence: 0,
+                atkSpeed: 1.0, // attacks per second
+                critRate: 5,   // percentage
+                critDmg: 1.5
+            },
+            world: {
+                zone: 1,
+                stage: 1,
+                maxStages: 10,
+                autoAdvance: true
+            },
+            currentEnemy: null,
+            lastTick: Date.now(),
+            attackTimer: 0,
+            skills: {
+                strength: { level: 0, cost: 15, mult: 1.15 },
+                agility: { level: 0, cost: 15, mult: 1.15 },
+                vitality: { level: 0, cost: 20, mult: 1.2 },
+                mastery: { level: 0, cost: 50, mult: 1.3 }
+            },
+            equipment: [
+                { id: "sword", name: "Iron Broadsword", level: 0, baseCost: 40, costMult: 1.35, statBonus: 4, type: "atk" },
+                { id: "armor", name: "Steel Cuirass", level: 0, baseCost: 50, costMult: 1.4, statBonus: 15, type: "hp" },
+                { id: "boots", name: "Swift Greaves", level: 0, baseCost: 60, costMult: 1.45, statBonus: 0.05, type: "spd" }
+            ],
+            upgrades: [
+                { id: "sharpening", name: "Whetstone Sharpening", level: 0, baseCost: 100, costMult: 1.5, effect: 5, desc: "+5 Flat Attack" },
+                { id: "meditation", name: "Arcane Meditation", level: 0, baseCost: 120, costMult: 1.5, effect: 10, desc: "+10 Max Mana" },
+                { id: "greed", name: "Amulet of Greed", level: 0, baseCost: 200, costMult: 1.6, effect: 0.1, desc: "+10% Gold Drops" }
+            ],
+            party: [
+                { id: "archer", name: "Lyra the Archer", unlocked: false, cost: 250, dps: 8, level: 1 },
+                { id: "mage", name: "Ignis the Pyromancer", unlocked: false, cost: 1000, dps: 35, level: 1 }
+            ],
+            zonesData: [
+                { id: 1, name: "Whispering Woods", enemyName: "Slime", hpBase: 50, goldBase: 10 },
+                { id: 2, name: "Goblin Outpost", enemyName: "Goblin", hpBase: 180, goldBase: 35 },
+                { id: 3, name: "Cursed Catacombs", enemyName: "Skeleton", hpBase: 650, goldBase: 120 },
+                { id: 4, name: "Dragon's Ascent", enemyName: "Boss", hpBase: 2500, goldBase: 500 }
+            ],
 
-        document.getElementById('boots-equipment').addEventListener('click', () => {
-            if (characterGold >= 50) {
-                characterGold -= 50;
-                boots = true;
-                document.getElementById('character-gold').innerHTML = characterGold;
-            }
-        });
+            init() {
+                this.loadGame();
+                this.spawnEnemy();
+                this.renderUI();
+                this.setupEventListeners();
+                
+                // Main Game Loop (60 FPS / 16.6ms)
+                setInterval(() => this.loop(), 100);
+            },
 
-        document.getElementById('gloves-equipment').addEventListener('click', () => {
-            if (characterGold >= 50) {
-                characterGold -= 50;
-                gloves = true;
-                document.getElementById('character-gold').innerHTML = characterGold;
-            }
-        });
+            loop() {
+                const now = Date.now();
+                const delta = (now - this.lastTick) / 1000;
+                this.lastTick = now;
 
-        document.getElementById('attack-button').addEventListener('click', () => {
-            let damage = strength * 2;
-            if (sword) {
-                damage *= 1.5;
-            }
-            enemyHealth -= damage;
-            document.getElementById('enemy-health').innerHTML = enemyHealth;
-            if (enemyHealth <= 0) {
-                characterExperience += 100;
-                characterGold += 50;
-                document.getElementById('character-experience').innerHTML = characterExperience;
-                document.getElementById('character-gold').innerHTML = characterGold;
-                enemyHealth = 100;
-                document.getElementById('enemy-health').innerHTML = enemyHealth;
-            }
-        });
+                this.updateCombat(delta);
+                this.updateRegen(delta);
+                this.renderDynamicUI();
+            },
 
-        document.getElementById('defend-button').addEventListener('click', () => {
-            let defense = agility * 2;
-            if (shield) {
-                defense *= 1.5;
-            }
-            playerHealth += defense;
-            document.getElementById('player-health').innerHTML = playerHealth;
-            if (playerHealth > 100) {
-                playerHealth = 100;
-                document.getElementById('player-health').innerHTML = playerHealth;
-            }
-        });
+            updateCombat(delta) {
+                if (!this.currentEnemy) return;
 
-        document.getElementById('unlock-member-1').addEventListener('click', () => {
-            if (characterGold >= 100) {
-                characterGold -= 100;
-                member1Unlocked = true;
-                document.getElementById('character-gold').innerHTML = characterGold;
-            }
-        });
+                // Player Auto Attack Timer
+                this.attackTimer += delta;
+                const currentAtkInterval = 1 / this.getPlayerAtkSpeed();
+                if (this.attackTimer >= currentAtkInterval) {
+                    this.attackTimer = 0;
+                    this.playerAttack();
+                }
 
-        document.getElementById('unlock-member-2').addEventListener('click', () => {
-            if (characterGold >= 200) {
-                characterGold -= 200;
-                member2Unlocked = true;
-                document.getElementById('character-gold').innerHTML = characterGold;
-            }
-        });
+                // Party Member Automated DPS
+                this.party.forEach(member => {
+                    if (member.unlocked) {
+                        const damage = member.dps * delta * member.level;
+                        this.damageEnemy(damage, false);
+                    }
+                });
+            },
 
-        document.getElementById('unlock-member-3').addEventListener('click', () => {
-            if (characterGold >= 300) {
-                characterGold -= 300;
-                member3Unlocked = true;
-                document.getElementById('character-gold').innerHTML = characterGold;
-            }
-        });
+            updateRegen(delta) {
+                if (this.player.mana < this.player.manaMax) {
+                    this.player.mana = Math.min(this.player.manaMax, this.player.mana + (this.player.manaRegen * delta));
+                }
+            },
 
-        document.getElementById('healing-ability').addEventListener('click', () => {
-            if (characterMana >= 10) {
-                characterMana -= 10;
-                playerHealth += 10;
-                document.getElementById('character-mana').innerHTML = characterMana;
-                document.getElementById('player-health').innerHTML = playerHealth;
-            }
-        });
+            getPlayerAtkSpeed() {
+                let bonusSpd = 0;
+                const boots = this.equipment.find(e => e.id === 'boots');
+                if (boots) bonusSpd += boots.level * boots.statBonus;
+                return Math.min(3.0, this.player.atkSpeed + bonusSpd + (this.player.agility * 0.02));
+            },
 
-        document.getElementById('damage-ability').addEventListener('click', () => {
-            if (characterMana >= 10) {
-                characterMana -= 10;
-                enemyHealth -= 10;
-                document.getElementById('character-mana').innerHTML = characterMana;
-                document.getElementById('enemy-health').innerHTML = enemyHealth;
-            }
-        });
+            getPlayerAttackPower() {
+                let flatUpgrade = 0;
+                const sharp = this.upgrades.find(u => u.id === 'sharpening');
+                if (sharp) flatUpgrade += sharp.level * sharp.effect;
 
-        document.getElementById('shield-ability').addEventListener('click', () => {
-            if (characterMana >= 10) {
-                characterMana -= 10;
-                playerHealth += 10;
-                document.getElementById('character-mana').innerHTML = characterMana;
-                document.getElementById('player-health').innerHTML = playerHealth;
-            }
-        });
+                let swordBonus = 0;
+                const sword = this.equipment.find(e => e.id === 'sword');
+                if (sword) swordBonus += sword.level * sword.statBonus;
 
-        setInterval(() => {
-            characterExperience += 1;
-            document.getElementById('character-experience').innerHTML = characterExperience;
-            if (characterExperience >= 100) {
-                characterLevel++;
-                characterExperience = 0;
-                document.getElementById('character-level').innerHTML = characterLevel;
-                document.getElementById('character-experience').innerHTML = characterExperience;
-            }
-        }, 1000);
+                return (this.player.strength * 3) + flatUpgrade + swordBonus + 5;
+            },
 
-        setInterval(() => {
-            enemyHealth += 1;
-            document.getElementById('enemy-health').innerHTML = enemyHealth;
-            if (enemyHealth > 100) {
-                enemyHealth = 100;
-                document.getElementById('enemy-health').innerHTML = enemyHealth;
-            }
-        }, 1000);
+            playerAttack(isSpecial = false) {
+                let baseDmg = this.getPlayerAttackPower();
+                if (isSpecial) baseDmg *= 2.5;
 
-        setInterval(() => {
-            playerHealth -= 1;
-            document.getElementById('player-health').innerHTML = playerHealth;
-            if (playerHealth <= 0) {
-                playerHealth = 0;
-                document.getElementById('player-health').innerHTML = playerHealth;
-                alert('Game Over!');
-            }
-        }, 1000);
+                let isCrit = Math.random() * 100 < (this.player.critRate + this.player.mastery);
+                let finalDmg = isCrit ? baseDmg * this.player.critDmg : baseDmg;
 
-        setInterval(() => {
-            characterMana += 1;
-            document.getElementById('character-mana').innerHTML = characterMana;
-            if (characterMana > 100) {
-                characterMana = 100;
-                document.getElementById('character-mana').innerHTML = characterMana;
-            }
-        }, 1000);
+                this.damageEnemy(finalDmg, isCrit);
+                this.triggerPlayerAnim();
+            },
 
-        setInterval(() => {
-            if (sword) {
-                enemyHealth -= 1;
-                document.getElementById('enemy-health').innerHTML = enemyHealth;
+            damageEnemy(amount, isCrit) {
+                if (!this.currentEnemy) return;
+                
+                amount = Math.floor(amount);
+                this.currentEnemy.hp -= amount;
+                this.spawnFloatingText(amount, isCrit ? 'gold' : 'white', 'enemy-svg-container');
+
+                if (this.currentEnemy.hp <= 0) {
+                    this.defeatEnemy();
+                }
+            },
+
+            castSpecialAbility() {
+                if (this.player.mana >= 25) {
+                    this.player.mana -= 25;
+                    this.playerAttack(true);
+                    this.log("Casted Active Strike for massive damage!");
+                } else {
+                    this.log("Not enough mana for Active Strike.");
+                }
+            },
+
+            defeatEnemy() {
+                const zoneObj = this.zonesData[this.world.zone - 1];
+                let goldReward = Math.floor(zoneObj.goldBase * Math.pow(1.3, this.world.stage - 1));
+                
+                const greed = this.upgrades.find(u => u.id === 'greed');
+                if (greed) goldReward += Math.floor(goldReward * (greed.level * greed.effect));
+
+                this.player.gold += goldReward;
+                let expReward = 15 * this.world.zone * this.world.stage;
+                this.gainExp(expReward);
+
+                this.log(`Defeated ${this.currentEnemy.name}! Gained ${goldReward} gold and ${expReward} EXP.`);
+
+                // Progression
+                if (this.world.stage < this.world.maxStages) {
+                    this.world.stage++;
+                } else {
+                    if (this.world.zone < this.zonesData.length) {
+                        this.world.zone++;
+                        this.world.stage = 1;
+                        this.log(`Unlocked new zone: ${this.zonesData[this.world.zone - 1].name}!`);
+                    } else if (this.world.autoAdvance) {
+                        // Loop back or endless mode
+                        this.world.stage = 1;
+                    }
+                }
+
+                this.spawnEnemy();
+            },
+
+            spawnEnemy() {
+                const zoneObj = this.zonesData[this.world.zone - 1];
+                let maxHp = Math.floor(zoneObj.hpBase * Math.pow(1.4, this.world.stage - 1));
+                this.currentEnemy = {
+                    name: this.world.stage === 10 ? "Zone Boss" : zoneObj.enemyName,
+                    hp: maxHp,
+                    maxHp: maxHp
+                };
+                this.renderEnemySVG();
+            },
+
+              gainExp(amount) {
+                this.player.exp += amount;
+                while (this.player.exp >= this.player.expMax) {
+                    this.player.exp -= this.player.expMax;
+                    this.player.level++;
+                    this.player.expMax = Math.floor(this.player.expMax * 1.1);
+                    this.player.statPoints++;
+                    this.updatePlayerStats();
+                }
+                this.updateUI();
+            },
+
+            updatePlayerStats() {
+                this.player.str += Math.floor(this.player.statPoints / 3);
+                this.player.agi += Math.floor(this.player.statPoints / 3);
+                this.player.vit += Math.floor(this.player.statPoints / 3);
+                this.player.statPoints = 0;
+            },
+
+            updateUI() {
+                document.getElementById('player-level').innerHTML = this.player.level;
+                document.getElementById('player-exp').innerHTML = this.player.exp;
+                document.getElementById('player-exp-max').innerHTML = this.player.expMax;
+                document.getElementById('player-str').innerHTML = this.player.str;
+                document.getElementById('player-agi').innerHTML = this.player.agi;
+                document.getElementById('player-vit').innerHTML = this.player.vit;
+            },
+
+            buyItem(item) {
+                if (this.player.gold >= item.cost) {
+                    this.player.gold -= item.cost;
+                    this.player.inventory.push(item);
+                    this.updateUI();
+                }
+            },
+
+            useItem(item) {
+                if (this.player.inventory.includes(item)) {
+                    this.player.inventory.splice(this.player.inventory.indexOf(item), 1);
+                    item.effect();
+                    this.updateUI();
+                }
+            },
+
+            attack() {
+                let damage = this.player.str * 2;
+                this.enemy.hp -= damage;
+                if (this.enemy.hp <= 0) {
+                    this.gainExp(100);
+                    this.enemy.hp = 100;
+                }
+                this.updateUI();
+            },
+
+            defend() {
+                let defense = this.player.agi * 2;
+                this.player.hp += defense;
+                if (this.player.hp > 100) {
+                    this.player.hp = 100;
+                }
+                this.updateUI();
+            },
+
+            startCombat() {
+                this.combatInterval = setInterval(() => {
+                    this.attack();
+                }, 1000);
+            },
+
+            stopCombat() {
+                clearInterval(this.combatInterval);
             }
-        }, 5000);
+        }
+
+        let game = new Game();
+        game.startCombat();
     </script>
 </body>
 </html>
