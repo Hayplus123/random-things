@@ -36,6 +36,14 @@
             font-size: 24px;
             padding: 10px;
         }
+        #play-time-input {
+            font-size: 24px;
+            padding: 10px;
+        }
+        #start-button {
+            font-size: 24px;
+            padding: 10px;
+        }
         #game-over-message {
             position: absolute;
             top: 0;
@@ -58,6 +66,9 @@
             <br>
             How many players are playing?
             <input id="player-count-input" type="number" min="1" max="4" value="1">
+            <br>
+            How long do you want to play (in minutes)?
+            <input id="play-time-input" type="number" min="1" max="5" value="1">
             <button id="start-button">Start Game</button>
         </div>
         <div id="game-over-message">
@@ -149,12 +160,14 @@
         // Home screen
         var homeScreen = document.getElementById('home-screen');
         var playerCountInput = document.getElementById('player-count-input');
+        var playTimeInput = document.getElementById('play-time-input');
         var startButton = document.getElementById('start-button');
         startButton.addEventListener('click', function() {
             var playerCount = parseInt(playerCountInput.value);
-            if (playerCount >= 1 && playerCount <= 4) {
+            var playTime = parseInt(playTimeInput.value);
+            if (playerCount >= 1 && playerCount <= 4 && playTime >= 1 && playTime <= 5) {
                 homeScreen.style.display = 'none';
-                initializeGame(playerCount);
+                initializeGame(playerCount, playTime);
             }
         });
 
@@ -162,7 +175,7 @@
         var gameOverMessage = document.getElementById('game-over-message');
 
         // Initialize the game
-        function initializeGame(playerCount) {
+        function initializeGame(playerCount, playTime) {
             // Initialize the players
             for (var i = 0; i < playerCount; i++) {
                 players.push(new Player(Math.random() * canvas.width, Math.random() * canvas.height, 'red'));
@@ -179,7 +192,8 @@
             }
 
             // Main game loop
-            var timer = 60; // seconds
+            var timer = playTime * 60; // seconds
+            var startTime = new Date().getTime();
             var intervalId = setInterval(function() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -219,7 +233,9 @@
                 }
 
                 // Update timer
-                timer--;
+                var currentTime = new Date().getTime();
+                var elapsedTime = (currentTime - startTime) / 1000;
+                timer = playTime * 60 - Math.floor(elapsedTime);
                 ctx.font = '24px Arial';
                 ctx.fillStyle = 'black';
                 ctx.textAlign = 'left';
