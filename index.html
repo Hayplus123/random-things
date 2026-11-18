@@ -21,11 +21,50 @@
             height: 100%;
             border: 1px solid #000;
         }
+        #home-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        #player-count-input {
+            font-size: 24px;
+            padding: 10px;
+        }
+        #game-over-message {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div id="game-container">
         <canvas id="game-canvas" width="800" height="600"></canvas>
+        <div id="home-screen">
+            Welcome to Tag Game!
+            <br>
+            How many players are playing?
+            <input id="player-count-input" type="number" min="1" max="4" value="1">
+            <button id="start-button">Start Game</button>
+        </div>
+        <div id="game-over-message">
+            Game Over!
+            <br>
+            Time's up!
+        </div>
     </div>
     <script>
         // Get the canvas element
@@ -104,102 +143,110 @@
 
         // Initialize the players, power-ups, and jump pads
         var players = [];
-        for (var i = 0; i < 4; i++) {
-            players.push(new Player(Math.random() * canvas.width, Math.random() * canvas.height, 'red'));
-        }
         var powerUps = [];
-        for (var i = 0; i < 10; i++) {
-            powerUps.push(new PowerUp(Math.random() * canvas.width, Math.random() * canvas.height, 'speed'));
-        }
         var jumpPads = [];
-        for (var i = 0; i < 5; i++) {
-            jumpPads.push(new JumpPad(Math.random() * canvas.width, Math.random() * canvas.height));
-        }
 
-        // Main game loop
-        var timer = 60; // seconds
-        var intervalId = setInterval(function() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Update and draw players
-            for (var i = 0; i < players.length; i++) {
-                players[i].update();
-                players[i].draw();
-            }
-
-            // Update and draw power-ups
-            for (var i = 0; i < powerUps.length; i++) {
-                powerUps[i].draw();
-            }
-
-            // Update and draw jump pads
-            for (var i = 0; i < jumpPads.length; i++) {
-                jumpPads[i].draw();
-            }
-
-            // Check for collisions
-            for (var i = 0; i < players.length; i++) {
-                for (var j = 0; j < powerUps.length; j++) {
-                    if (checkCollision(players[i], powerUps[j])) {
-                        // Apply power-up effect
-                        if (powerUps[j].type === 'speed') {
-                            players[i].speed += 2;
-                        }
-                        powerUps.splice(j, 1);
-                    }
-                }
-                for (var j = 0; j < jumpPads.length; j++) {
-                    if (checkCollision(players[i], jumpPads[j])) {
-                        // Apply jump pad effect
-                        players[i].jump();
-                    }
-                }
-            }
-
-            // Zoom in and out based on player positions
-            var minX = Math.min.apply(null, players.map(function(player) { return player.x; }));
-            var maxX = Math.max.apply(null, players.map(function(player) { return player.x; }));
-            var minY = Math.min.apply(null, players.map(function(player) { return player.y; }));
-            var maxY = Math.max.apply(null, players.map(function(player) { return player.y; }));
-            var zoom = Math.min(canvas.width / (maxX - minX), canvas.height / (maxY - minY));
-            ctx.save();
-            ctx.translate(canvas.width / 2, canvas.height / 2);
-            ctx.scale(zoom, zoom);
-            ctx.translate(-canvas.width / 2, -canvas.height / 2);
-
-            // Draw everything again with the new zoom level
-            for (var i = 0; i < players.length; i++) {
-                players[i].draw();
-            }
-            for (var i = 0; i < powerUps.length; i++) {
-                powerUps[i].draw();
-            }
-            for (var i = 0; i < jumpPads.length; i++) {
-                jumpPads[i].draw();
-            }
-            ctx.restore();
-
-            // Update timer
-            timer--;
-            if (timer <= 0) {
-                clearInterval(intervalId);
-                alert('Game over!');
-            }
-        }, 1000 / 60);
-
-        // Handle keyboard input
-        document.addEventListener('keydown', function(event) {
-            if (event.key === ' ') {
-                players[0].jump();
+        // Home screen
+        var homeScreen = document.getElementById('home-screen');
+        var playerCountInput = document.getElementById('player-count-input');
+        var startButton = document.getElementById('start-button');
+        startButton.addEventListener('click', function() {
+            var playerCount = parseInt(playerCountInput.value);
+            if (playerCount >= 1 && playerCount <= 4) {
+                homeScreen.style.display = 'none';
+                initializeGame(playerCount);
             }
         });
 
-        // Check for collisions between two objects
-        function checkCollision(obj1, obj2) {
-            return obj1.x < obj2.x + obj2.width &&
-                   obj1.x + obj1.width > obj2.x &&
-                   obj1.y < obj2.y + obj2.height &&
-                   obj1.y + obj1.height > obj2.y;
+        // Game over message
+        var gameOverMessage = document.getElementById('game-over-message');
+
+        // Initialize the game
+        function initializeGame(playerCount) {
+            // Initialize the players
+            for (var i = 0; i < playerCount; i++) {
+                players.push(new Player(Math.random() * canvas.width, Math.random() * canvas.height, 'red'));
+            }
+
+            // Initialize the power-ups
+            for (var i = 0; i < 10; i++) {
+                powerUps.push(new PowerUp(Math.random() * canvas.width, Math.random() * canvas.height, 'speed'));
+            }
+
+            // Initialize the jump pads
+            for (var i = 0; i < 5; i++) {
+                jumpPads.push(new JumpPad(Math.random() * canvas.width, Math.random() * canvas.height));
+            }
+
+            // Main game loop
+            var timer = 60; // seconds
+            var intervalId = setInterval(function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Update and draw players
+                for (var i = 0; i < players.length; i++) {
+                    players[i].update();
+                    players[i].draw();
+                }
+
+                // Update and draw power-ups
+                for (var i = 0; i < powerUps.length; i++) {
+                    powerUps[i].draw();
+                }
+
+                // Update and draw jump pads
+                for (var i = 0; i < jumpPads.length; i++) {
+                    jumpPads[i].draw();
+                }
+
+                // Check for collisions
+                for (var i = 0; i < players.length; i++) {
+                    for (var j = 0; j < powerUps.length; j++) {
+                        if (checkCollision(players[i], powerUps[j])) {
+                            // Apply power-up effect
+                            if (powerUps[j].type === 'speed') {
+                                players[i].speed += 2;
+                            }
+                            powerUps.splice(j, 1);
+                        }
+                    }
+                    for (var j = 0; j < jumpPads.length; j++) {
+                        if (checkCollision(players[i], jumpPads[j])) {
+                            // Apply jump pad effect
+                            players[i].jump();
+                        }
+                    }
+                }
+
+                // Update timer
+                timer--;
+                ctx.font = '24px Arial';
+                ctx.fillStyle = 'black';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'top';
+                ctx.fillText('Time: ' + timer, 10, 10);
+
+                // Game over
+                if (timer <= 0) {
+                    clearInterval(intervalId);
+                    gameOverMessage.style.display = 'block';
+                }
+            }, 1000 / 60);
+
+            // Handle keyboard input
+            document.addEventListener('keydown', function(event) {
+                if (event.key === ' ') {
+                    players[0].jump();
+                }
+            });
+
+            // Check for collisions between two objects
+            function checkCollision(obj1, obj2) {
+                return obj1.x < obj2.x + obj2.width &&
+                       obj1.x + obj1.width > obj2.x &&
+                       obj1.y < obj2.y + obj2.height &&
+                       obj1.y + obj1.height > obj2.y;
+            }
         }
     </script>
 </body>
