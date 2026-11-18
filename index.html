@@ -123,6 +123,14 @@
                     this.velocityY = -this.jumpSpeed;
                 }
             }
+
+            moveLeft() {
+                this.x -= this.speed;
+            }
+
+            moveRight() {
+                this.x += this.speed;
+            }
         }
 
         // Define the power-up class
@@ -201,6 +209,19 @@
                 for (var i = 0; i < players.length; i++) {
                     players[i].update();
                     players[i].draw();
+
+                    // AI for other players
+                    if (i > 0) {
+                        if (players[i].x < players[0].x) {
+                            players[i].moveRight();
+                        } else if (players[i].x > players[0].x) {
+                            players[i].moveLeft();
+                        }
+
+                        if (Math.random() < 0.1) {
+                            players[i].jump();
+                        }
+                    }
                 }
 
                 // Update and draw power-ups
@@ -253,6 +274,10 @@
             document.addEventListener('keydown', function(event) {
                 if (event.key === ' ') {
                     players[0].jump();
+                } else if (event.key === 'ArrowLeft') {
+                    players[0].moveLeft();
+                } else if (event.key === 'ArrowRight') {
+                    players[0].moveRight();
                 }
             });
 
