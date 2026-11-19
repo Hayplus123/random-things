@@ -163,7 +163,6 @@ function startGame(){
   jumpPads=map.jumpPads.map(p=>({...p,active:true,cooldown:0}));
   powerups=[]; particles=[]; players=[]; gameTime=timeLimit; gameRunning=true; gameOver=false;
   
-  // Spawn players distributed across map
   const spawns = generateSpawns(map, playerCount);
   for(let i=0;i<playerCount;i++){
     const s=spawns[i];
@@ -178,7 +177,7 @@ function startGame(){
     });
   }
   itIndex = Math.floor(Math.random()*playerCount);
-  players[itIndex].invuln=120; // brief invuln after becoming it
+  players[itIndex].invuln=120;
   menu.classList.add('hidden'); ui.classList.remove('hidden'); hint.classList.remove('hidden');
   spawnPowerups(map, 6+playerCount*2);
   lastTime=performance.now(); requestAnimationFrame(loop);
@@ -225,30 +224,22 @@ function loop(now){
 
 // ===== UPDATE =====
 function update(dt){
-  // Human input
   const human = players[0];
   human.input.left = keys['KeyA']||keys['ArrowLeft'];
   human.input.right = keys['KeyD']||keys['ArrowRight'];
   human.input.jump = (keys['KeyW']||keys['ArrowUp']||keys['Space']) && human.grounded;
   
-  // Bot AI
   for(let i=1;i<players.length;i++) updateBot(players[i], dt);
   
-  // Physics
   players.forEach(p=>updatePlayer(p, dt));
-  
-  // Collisions
   players.forEach(p=>checkPlatformCollisions(p));
   players.forEach(p=>checkJumpPads(p));
   
-  // Powerups
   updatePowerups(dt);
   players.forEach(p=>checkPowerupCollisions(p));
   
-  // Tagging
   handleTagging();
   
-  // Timers
   players.forEach(p=>{
     if(p.tagCooldown>0) p.tagCooldown-=dt;
     if(p.invuln>0) p.invuln-=dt;
@@ -258,10 +249,8 @@ function update(dt){
     if(p.shrinkTimer>0){ p.shrinkTimer-=dt; if(p.shrinkTimer<=0){ p.sizeMul=1; p.radius=PLAYER_RADIUS; } }
   });
   
-  // Camera
   updateCamera();
   
-  // Particles
   particles.forEach(pt=>{ pt.x+=pt.vx; pt.y+=pt.vy; pt.vy+=0.2; pt.life-=dt; pt.alpha=pt.life/pt.maxLife; });
   particles = particles.filter(pt=>pt.life>0);
 }
@@ -507,22 +496,45 @@ function drawPlatforms(){
   });
 }
 
+function drawJumpPads(){
+  jumpPads.forEach(jp=>{
+    if(!jp.active){
+      ctx.fillStyle='#30363d88';
+      ctx.fillRect(jp.x, jp.y, jp.w, jp.h);
+      return;
+    }
+    const gradient = ctx.createLinearGradient(jp.x, jp.y, jp.x, jp.y+jp.h);
+    gradient.addColorStop(0, '#ff7b00');
+    gradient.addColorStop(1, '#cc5500');
+    ctx.fillStyle=gradient;
+    ctx.beginPath();
+    ctx.roundRect(jp.x, jp.y, jp.w, jp.h, 6);
+    ctx.fill();
+    ctx.fillStyle='#fff';
+    ctx.font = `bold ${jp.h*0.6}px Arial`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('↑', jp.x+jp.w/2, jp.y+jp.h/2+2);
+    const pulse = 0.5 + 0.5*Math.sin(Date.now()/200);
+    ctx.strokeStyle=`rgba(255,123,0,${pulse*0.6})`;
+    ctx.lineWidth=3/camera.zoom;
+    ctx.stroke();
+  });
+}
+
 function drawPowerups(){
   powerups.forEach(pu=>{
     if(pu.collected) return;
     const {x,y,type}=pu;
     const r=18;
-    // Glow
     const glow = ctx.createRadialGradient(x,y,0,x,y,r*2);
     glow.addColorStop(0, type.color+'80');
     glow.addColorStop(1, type.color+'00');
     ctx.fillStyle=glow;
     ctx.beginPath(); ctx.arc(x,y,r*2,0,Math.PI*2); ctx.fill();
-    // Main circle
-    ctx.fillStyle=type.color;
+    ctx.fillStyle=type.color
+
     ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
     ctx.strokeStyle='#fff'; ctx.lineWidth=2/camera.zoom; ctx.stroke();
-    // Symbol
     ctx.fillStyle='#fff';
     ctx.font = `bold ${r*0.9}px Arial`;
     ctx.textAlign='center'; ctx.textBaseline='middle';
@@ -539,11 +551,9 @@ function drawParticle(pt){
 
 function drawPlayer(p){
   const r = p.radius;
-  // Shadow
   ctx.fillStyle='rgba(0,0,0,0.3)';
   ctx.beginPath(); ctx.ellipse(p.x, p.y+r*0.9, r*0.7, r*0.2, 0,0,Math.PI*2); ctx.fill();
   
-  // Shield effect
   if(p.shielded){
     const t=Date.now()/100;
     ctx.strokeStyle=`rgba(88,166,255,${0.4+0.3*Math.sin(t)})`;
@@ -551,19 +561,16 @@ function drawPlayer(p){
     ctx.beginPath(); ctx.arc(p.x,p.y,r+8+2*Math.sin(t),0,Math.PI*2); ctx.stroke();
   }
   
-  // Body
   const bodyGrad = ctx.createRadialGradient(p.x-r*0.3, p.y-r*0.3, 0, p.x, p.y, r);
   bodyGrad.addColorStop(0, lightenColor(p.color, 40));
   bodyGrad.addColorStop(1, p.color);
   ctx.fillStyle=bodyGrad;
   ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI*2); ctx.fill();
   
-  // Outline
   ctx.strokeStyle=darkenColor(p.color, 30);
   ctx.lineWidth=2.5/camera.zoom;
   ctx.stroke();
   
-  // Eyes
   const eyeOffset = r*0.35;
   const eyeY = p.y - r*0.1;
   ctx.fillStyle='#1a1a1a';
@@ -573,7 +580,6 @@ function drawPlayer(p){
   ctx.fillStyle='#1a1a1a';
   ctx.beginPath(); ctx.arc(p.x - p.facing*eyeOffset*0.5, eyeY, r*0.12, 0, Math.PI*2); ctx.fill();
   
-  // "IT" indicator - triangle above head
   if(p.id === itIndex){
     const triY = p.y - r - 14;
     const pulse = 1 + 0.15*Math.sin(Date.now()/100);
@@ -590,7 +596,6 @@ function drawPlayer(p){
     ctx.fillText('IT', p.x, triY - 14*pulse);
   }
   
-  // Powerup indicators
   let iconY = p.y - r - 28;
   if(p.shielded){ drawIcon(p.x, iconY, '🛡', '#58a6ff'); iconY -= 18; }
   if(p.speedMul>1){ drawIcon(p.x, iconY, '⚡', '#ffa657'); iconY -= 18; }
