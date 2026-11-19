@@ -187,12 +187,10 @@ function startGame(){
 // ===== SPAWN LOGIC =====
 function generateSpawns(map, count){
   const spots=[];
-  // Ground level spawns
   for(let i=0;i<count;i++){
     const x = 200 + (map.w-400) * (i/(count-1 || 1));
     spots.push({x, y: map.h-150});
   }
-  // Add some platform spawns for variety
   const platSpawns = map.platforms.filter(p=>p.w>150 && p.y<map.h-200).slice(0,count);
   platSpawns.forEach((p,i)=>{ if(spots[i]) spots[i]={x:p.x+p.w/2, y:p.y-60}; });
   return spots;
@@ -213,7 +211,7 @@ function spawnPowerups(map, count){
 
 // ===== MAIN LOOP =====
 function loop(now){
-  const dt = Math.min(32, now-lastTime)/16.67; // normalized to 60fps
+  const dt = Math.min(32, now-lastTime)/16.67;
   lastTime = now;
   
   if(gameRunning && !gameOver){
@@ -227,7 +225,7 @@ function loop(now){
 
 // ===== UPDATE =====
 function update(dt){
-  // Input - Human player (index 0)
+  // Human input
   const human = players[0];
   human.input.left = keys['KeyA']||keys['ArrowLeft'];
   human.input.right = keys['KeyD']||keys['ArrowRight'];
@@ -236,20 +234,18 @@ function update(dt){
   // Bot AI
   for(let i=1;i<players.length;i++) updateBot(players[i], dt);
   
-  // Physics & movement
+  // Physics
   players.forEach(p=>updatePlayer(p, dt));
   
-  // Collisions: player-platform
+  // Collisions
   players.forEach(p=>checkPlatformCollisions(p));
-  
-  // Jump pads
   players.forEach(p=>checkJumpPads(p));
   
   // Powerups
   updatePowerups(dt);
   players.forEach(p=>checkPowerupCollisions(p));
   
-  // Tag logic
+  // Tagging
   handleTagging();
   
   // Timers
@@ -274,7 +270,6 @@ function updatePlayer(p, dt){
   const speed = BASE_SPEED * p.speedMul;
   const friction = p.grounded ? FRICTION : AIR_FRICTION;
   
-  // Horizontal
   if(p.input.left) p.vx -= speed * (p.grounded?1:0.6);
   if(p.input.right) p.vx += speed * (p.grounded?1:0.6);
   p.vx *= friction;
@@ -282,7 +277,6 @@ function updatePlayer(p, dt){
   p.x += p.vx;
   if(p.vx>0.1) p.facing=1; else if(p.vx<-0.1) p.facing=-1;
   
-  // Vertical
   p.vy += GRAVITY;
   if(p.input.jump && p.grounded){
     p.vy = -BASE_JUMP * p.jumpMul;
@@ -292,7 +286,6 @@ function updatePlayer(p, dt){
   }
   p.y += p.vy;
   
-  // World bounds
   const map=MAPS[mapSize];
   if(p.x < p.radius){ p.x=p.radius; p.vx=0; }
   if(p.x > map.w-p.radius){ p.x=map.w-p.radius; p.vx=0; }
@@ -352,7 +345,7 @@ function checkPowerupCollisions(p){
     if(pu.collected) return;
     const dx=p.x-pu.x, dy=p.y-pu.y;
     if(dx*dx+dy*dy < (p.radius+20)*(p.radius+20)){
-      pu.collected=true; pu.respawn=1500; // 25 sec respawn
+      pu.collected=true; pu.respawn=1500;
       applyPowerup(p, pu.type);
       spawnCollectParticles(p.x, p.y, pu.type.color);
     }
@@ -378,7 +371,6 @@ function handleTagging(){
     const dx=it.x-other.x, dy=it.y-other.y;
     const dist=Math.hypot(dx,dy);
     if(dist < it.radius + other.radius){
-      // Tag!
       it.tagCooldown=30;
       other.tagCooldown=30;
       const oldIt = itIndex;
@@ -403,7 +395,6 @@ function updateBot(bot, dt){
   const dy = target.y - bot.y;
   const dist = Math.hypot(dx, dy);
   
-  // Horizontal movement
   if(Math.abs(dx) > 20){
     bot.input.left = dx < 0;
     bot.input.right = dx > 0;
@@ -411,7 +402,6 @@ function updateBot(bot, dt){
     bot.input.left = bot.input.right = false;
   }
   
-  // Jumping logic
   const canJump = bot.grounded;
   const needsJump = dy < -60 || (dy < -20 && dist < 150) || (isIt && dist < 200 && dy < 30);
   const jumpPadNearby = jumpPads.some(jp=>jp.active && Math.abs(bot.x - (jp.x+jp.w/2)) < 100 && bot.y > jp.y && bot.y - jp.y < 200);
@@ -422,9 +412,7 @@ function updateBot(bot, dt){
     bot.input.jump = false;
   }
   
-  // Platform navigation - simple: if stuck, jump
   if(bot.grounded && Math.abs(bot.vx) < 0.5 && (bot.input.left||bot.input.right)){
-    // Check for wall ahead
     const checkX = bot.x + (bot.facing>0?bot.radius+10:-bot.radius-10);
     const wallAhead = platforms.some(p=> checkX > p.x && checkX < p.x+p.w && bot.y > p.y-10 && bot.y < p.y+20 );
     if(wallAhead) bot.input.jump = true;
@@ -442,7 +430,6 @@ function findNearestPlayer(bot){
 }
 
 function findFarthestSafeSpot(bot, itPlayer){
-  // Find platform farthest from "it" player
   let best=null, bestScore=-Infinity;
   const map=MAPS[mapSize];
   const candidates = [
@@ -452,7 +439,6 @@ function findFarthestSafeSpot(bot, itPlayer){
   candidates.forEach(c=>{
     const dFromIt = Math.hypot(c.x-itPlayer.x, c.y-itPlayer.y);
     const dFromBot = Math.hypot(c.x-bot.x, c.y-bot.y);
-    // Prefer far from it, not too far from bot, and high up
     const score = dFromIt*1.5 - dFromBot*0.5 + (map.h-c.y)*0.1;
     if(score>bestScore){ bestScore=score; best=c; }
   });
@@ -482,33 +468,19 @@ function updateCamera(){
 function render(){
   ctx.fillStyle='#0d1117'; ctx.fillRect(0,0,canvas.width,canvas.height);
   
-  // Transform
   ctx.save();
   ctx.translate(canvas.width/2, canvas.height/2);
   ctx.scale(camera.zoom, camera.zoom);
   ctx.translate(-camera.x, -camera.y);
   
-  // Background grid
   drawBackground();
-  
-  // Platforms
   drawPlatforms();
-  
-  // Jump pads
   drawJumpPads();
-  
-  // Powerups
   drawPowerups();
-  
-  // Particles (behind players)
   particles.forEach(drawParticle);
-  
-  // Players
   players.forEach(p=>drawPlayer(p));
   
   ctx.restore();
-  
-  // UI overlay (timer, player tags)
   drawUIOverlay();
 }
 
@@ -522,35 +494,16 @@ function drawBackground(){
   for(let y=0;y<=map.h;y+=step){
     ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(map.w,y); ctx.stroke();
   }
-  // World border
   ctx.strokeStyle='#30363d'; ctx.lineWidth=4/camera.zoom;
   ctx.strokeRect(0,0,map.w,map.h);
 }
 
-function drawJumpPads(){
-  jumpPads.forEach(jp=>{
-    if(!jp.active){
-      ctx.fillStyle='#30363d88';
-      ctx.fillRect(jp.x, jp.y, jp.w, jp.h);
-      return;
-    }
-    const gradient = ctx.createLinearGradient(jp.x, jp.y, jp.x, jp.y+jp.h);
-    gradient.addColorStop(0, '#ff7b00');
-    gradient.addColorStop(1, '#cc5500');
-    ctx.fillStyle=gradient;
-    ctx.beginPath();
-    ctx.roundRect(jp.x, jp.y, jp.w, jp.h, 6);
-    ctx.fill();
-    // Arrow indicator
-    ctx.fillStyle='#fff';
-    ctx.font = `bold ${jp.h*0.6}px Arial`;
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('↑', jp.x+jp.w/2, jp.y+jp.h/2+2);
-    // Pulsing glow
-    const pulse = 0.5 + 0.5*Math.sin(Date.now()/200);
-    ctx.strokeStyle=`rgba(255,123,0,${pulse*0.6})`;
-    ctx.lineWidth=3/camera.zoom;
-    ctx.stroke();
+function drawPlatforms(){
+  ctx.fillStyle='#21262d';
+  ctx.strokeStyle='#30363d'; ctx.lineWidth=2/camera.zoom;
+  platforms.forEach(p=>{
+    ctx.beginPath(); ctx.roundRect(p.x, p.y, p.w, p.h, 4);
+    ctx.fill(); ctx.stroke();
   });
 }
 
@@ -598,7 +551,7 @@ function drawPlayer(p){
     ctx.beginPath(); ctx.arc(p.x,p.y,r+8+2*Math.sin(t),0,Math.PI*2); ctx.stroke();
   }
   
-  // Body (SVG-style using canvas path)
+  // Body
   const bodyGrad = ctx.createRadialGradient(p.x-r*0.3, p.y-r*0.3, 0, p.x, p.y, r);
   bodyGrad.addColorStop(0, lightenColor(p.color, 40));
   bodyGrad.addColorStop(1, p.color);
@@ -610,16 +563,13 @@ function drawPlayer(p){
   ctx.lineWidth=2.5/camera.zoom;
   ctx.stroke();
   
-  // Eye(s) - direction indicator
+  // Eyes
   const eyeOffset = r*0.35;
   const eyeY = p.y - r*0.1;
   ctx.fillStyle='#1a1a1a';
-  // Main eye
   ctx.beginPath(); ctx.arc(p.x + p.facing*eyeOffset, eyeY, r*0.18, 0, Math.PI*2); ctx.fill();
-  // Pupil
   ctx.fillStyle='#fff';
   ctx.beginPath(); ctx.arc(p.x + p.facing*(eyeOffset+r*0.06), eyeY, r*0.07, 0, Math.PI*2); ctx.fill();
-  // Second eye (smaller)
   ctx.fillStyle='#1a1a1a';
   ctx.beginPath(); ctx.arc(p.x - p.facing*eyeOffset*0.5, eyeY, r*0.12, 0, Math.PI*2); ctx.fill();
   
@@ -634,7 +584,6 @@ function drawPlayer(p){
     ctx.lineTo(p.x + 10*pulse, triY + 2*pulse);
     ctx.closePath(); ctx.fill();
     ctx.strokeStyle='#fff'; ctx.lineWidth=2/camera.zoom; ctx.stroke();
-    // "IT" text
     ctx.fillStyle='#f85149';
     ctx.font = `bold ${12/camera.zoom}px system-ui`;
     ctx.textAlign='center'; ctx.textBaseline='bottom';
@@ -656,14 +605,12 @@ function drawIcon(x, y, emoji, color){
 }
 
 function drawUIOverlay(){
-  // Timer
   const t = Math.max(0, Math.ceil(gameTime));
   const m = Math.floor(t/60), s = t%60;
   const timerEl = $('timer');
   timerEl.textContent = `${m}:${s.toString().padStart(2,'0')}`;
   timerEl.classList.toggle('warning', t<=10);
   
-  // Player tags
   const info = $('players-info');
   info.innerHTML = players.map((p,i)=>`
     <div class="player-tag ${p.id===itIndex?'it':''}">
@@ -699,7 +646,6 @@ function spawnTagParticles(x,y,color){
     x,y, vx:(Math.random()-0.5)*15, vy:Math.random()*-12-3,
     radius:4+Math.random()*6, color, life:70, maxLife:70, alpha:1
   });
-  // Screen shake
   camera.x += (Math.random()-0.5)*30;
   camera.y += (Math.random()-0.5)*20;
 }
@@ -723,7 +669,6 @@ function endGame(){
   ui.classList.add('hidden'); hint.classList.add('hidden'); gameover.classList.remove('hidden');
 }
 
-// Color helpers
 function lightenColor(hex, amt){
   const num=parseInt(hex.slice(1),16), r=(num>>16)+amt, g=((num>>8)&255)+amt, b=(num&255)+amt;
   return '#'+(0x1000000+Math.min(255,r)*0x10000+Math.min(255,g)*0x100+Math.min(255,b)).toString(16).slice(1);
@@ -733,5 +678,4 @@ function darkenColor(hex, amt){
   return '#'+(0x1000000+Math.max(0,r)*0x10000+Math.max(0,g)*0x100+Math.max(0,b)).toString(16).slice(1);
 }
 
-// Start
 init();
