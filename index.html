@@ -141,12 +141,25 @@ const menu=$('menu'), ui=$('ui'), gameover=$('gameover'), winnerText=$('winnerTe
 
 // ===== INIT =====
 function init(){
+  console.log('[DEBUG] init() running');
   canvas=c; ctx=canvas.getContext('2d');
+  if(!ctx){ console.error('Canvas context failed'); return; }
   resize(); window.addEventListener('resize',resize);
   window.addEventListener('keydown',e=>{keys[e.code]=true; if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD'].includes(e.code))e.preventDefault()});
   window.addEventListener('keyup',e=>keys[e.code]=false);
   timeLimitIn.addEventListener('input',()=>timeVal.textContent=timeLimitIn.value);
-  startBtn.addEventListener('click',startGame);
+  
+  // --- START BUTTON WITH DEBUG ---
+  if(startBtn){
+    startBtn.addEventListener('click', () => {
+      console.log('[DEBUG] Start button clicked!');
+      startGame();
+    });
+    console.log('[DEBUG] Start button listener attached');
+  } else {
+    console.error('[DEBUG] startBtn element NOT FOUND');
+  }
+  
   requestAnimationFrame(loop);
 }
 function resize(){
@@ -155,6 +168,7 @@ function resize(){
 
 // ===== GAME START =====
 function startGame(){
+  console.log('[DEBUG] startGame() called');
   playerCount=+playerCountSel.value;
   timeLimit=+timeLimitIn.value;
   mapSize=mapSizeSel.value;
@@ -180,7 +194,8 @@ function startGame(){
   players[itIndex].invuln=120;
   menu.classList.add('hidden'); ui.classList.remove('hidden'); hint.classList.remove('hidden');
   spawnPowerups(map, 6+playerCount*2);
-  lastTime=performance.now(); requestAnimationFrame(loop);
+  lastTime=performance.now(); 
+  console.log('[DEBUG] Game started, players:', players.length);
 }
 
 // ===== SPAWN LOGIC =====
@@ -225,9 +240,11 @@ function loop(now){
 // ===== UPDATE =====
 function update(dt){
   const human = players[0];
-  human.input.left = keys['KeyA']||keys['ArrowLeft'];
-  human.input.right = keys['KeyD']||keys['ArrowRight'];
-  human.input.jump = (keys['KeyW']||keys['ArrowUp']||keys['Space']) && human.grounded;
+  if(human){
+    human.input.left = keys['KeyA']||keys['ArrowLeft'];
+    human.input.right = keys['KeyD']||keys['ArrowRight'];
+    human.input.jump = (keys['KeyW']||keys['ArrowUp']||keys['Space']) && human.grounded;
+  }
   
   for(let i=1;i<players.length;i++) updateBot(players[i], dt);
   
@@ -351,7 +368,7 @@ function applyPowerup(p, type){
 
 function handleTagging(){
   const it = players[itIndex];
-  if(it.tagCooldown>0) return;
+  if(!it || it.tagCooldown>0) return;
   
   for(let i=0;i<players.length;i++){
     if(i===itIndex) continue;
@@ -531,8 +548,7 @@ function drawPowerups(){
     glow.addColorStop(1, type.color+'00');
     ctx.fillStyle=glow;
     ctx.beginPath(); ctx.arc(x,y,r*2,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle=type.color
-
+    ctx.fillStyle=type.color;
     ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
     ctx.strokeStyle='#fff'; ctx.lineWidth=2/camera.zoom; ctx.stroke();
     ctx.fillStyle='#fff';
