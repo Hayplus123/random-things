@@ -7,19 +7,19 @@
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{background:#0d1117;color:#e6edf3;font-family:system-ui,-apple-system,sans-serif;overflow:hidden;height:100vh;display:flex;flex-direction:column;align-items:center}
-  #ui{position:fixed;top:12px;left:50%;transform:translateX(-50%);display:none;gap:24px;background:rgba(13,17,23,0.92);border:1px solid #30363d;border-radius:10px;padding:8px 20px;z-index:100;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.5)}
+  #ui{position:fixed;top:12px;left:50%;transform:translateX(-50%);display:none;gap:20px;background:rgba(13,17,23,0.92);border:1px solid #30363d;border-radius:10px;padding:8px 20px;z-index:100;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.5)}
   #ui span{display:flex;align-items:center;gap:6px}
   #timer{font-variant-numeric:tabular-nums;font-size:22px;color:#388bfd;font-weight:700}
   #timer.warning{color:#f85149;animation:pulse .8s infinite alternate}
-  @keyframes pulse{from{opacity:1;transform:scale(1)}to{opacity:0.6;transform:scale(1.08)}}
+  @keyframes pulse{from{opacity:1;transform:scale(1)}to{opacity:0.65;transform:scale(1.08)}}
   #players-info{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
   .player-tag{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;background:#21262d;border:1px solid #30363d;transition:all .2s ease;font-size:13px}
-  .player-tag.it{background:#da3633;border-color:#f85149;color:#fff;box-shadow:0 0 14px rgba(248,81,73,0.6);animation:pulse .7s infinite alternate}
+  .player-tag.it{background:#da3633;border-color:#f85149;color:#fff;box-shadow:0 0 14px rgba(248,81,73,0.7);animation:pulse .7s infinite alternate}
   .player-tag .indicator{width:10px;height:10px;border-radius:50%}
   canvas{display:block;background:#161b22;width:100vw;height:100vh}
   #menu{position:fixed;inset:0;background:radial-gradient(circle at 50% 30%,#161b22 0%,#090d13 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:200;overflow-y:auto;padding:20px}
   #menu h1{font-size:52px;font-weight:800;letter-spacing:2px;background:linear-gradient(135deg,#58a6ff 0%,#bc8cff 50%,#f85149 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-  .menu-panel{background:rgba(22,27,34,0.85);backdrop-filter:blur(10px);border:1px solid #30363d;border-radius:14px;padding:28px 36px;display:flex;flex-direction:column;gap:16px;min-width:360px;max-width:92vw;box-shadow:0 12px 32px rgba(0,0,0,0.6)}
+  .menu-panel{background:rgba(22,27,34,0.88);backdrop-filter:blur(10px);border:1px solid #30363d;border-radius:14px;padding:28px 36px;display:flex;flex-direction:column;gap:16px;min-width:360px;max-width:92vw;box-shadow:0 12px 32px rgba(0,0,0,0.6)}
   .menu-row{display:flex;flex-direction:column;gap:8px}
   .menu-row label{font-size:13px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.5px}
   .menu-row select,.menu-row input[type=range]{padding:10px 12px;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:15px;outline:none;transition:border-color .2s}
@@ -35,10 +35,10 @@
   .guide-card{background:#161b22;border:1px solid #30363d;border-radius:14px;max-width:760px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 16px 40px rgba(0,0,0,0.7);overflow:hidden}
   .guide-header{padding:18px 24px;border-bottom:1px solid #30363d;display:flex;justify-content:space-between;align-items:center}
   .guide-header h3{font-size:22px;color:#58a6ff}
-  .close-btn{background:none;border:none;color:#8b949e;font-size:24px;cursor:pointer}
+  .close-btn{background:none;border:none;color:#8b949e;font-size:26px;cursor:pointer}
   .close-btn:hover{color:#fff}
   .guide-body{padding:24px;overflow-y:auto;display:flex;flex-direction:column;gap:20px}
-  .guide-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+  .guide-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
   .guide-item{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px 14px}
   .guide-item h4{font-size:14px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
   .guide-item p{font-size:12px;color:#8b949e;line-height:1.4}
@@ -62,7 +62,7 @@
   <h1>ULTIMATE TAG</h1>
   <div class="menu-panel">
     <div class="menu-row">
-      <label>Match Type / Total Players</label>
+      <label>Match Size</label>
       <select id="totalPlayers">
         <option value="2">2 Players</option>
         <option value="3">3 Players</option>
@@ -70,9 +70,9 @@
       </select>
     </div>
     <div class="menu-row">
-      <label>Human Players (Local Keyboard)</label>
+      <label>Humans (Local Keyboard)</label>
       <select id="humanCount">
-        <option value="1">1 Player (You vs Bots)</option>
+        <option value="1">1 Player (Solo vs Bots)</option>
         <option value="2">2 Players (P1 + P2 vs Bots)</option>
         <option value="3">3 Players (P1 + P2 + P3 vs Bot)</option>
         <option value="4" selected>4 Players (All Humans!)</option>
@@ -100,23 +100,23 @@
 <div id="guideModal">
   <div class="guide-card">
     <div class="guide-header">
-      <h3>Game Guide & Controls</h3>
+      <h3>Game Guide &amp; Controls</h3>
       <button class="close-btn" id="closeGuide">&times;</button>
     </div>
     <div class="guide-body">
       <div>
-        <h4 style="margin-bottom:8px;color:#e6edf3">Player Controls (Same Keyboard)</h4>
+        <h4 style="margin-bottom:8px;color:#e6edf3">Player Controls (Local Keyboard)</h4>
         <div class="guide-grid">
           <div class="guide-item" style="border-left:4px solid #f85149">
             <h4><span style="color:#f85149">●</span> Player 1 (Red)</h4>
-            <p>Move: <kbd>A</kbd> <kbd>D</kbd><br>Jump: <kbd>W</kbd> or <kbd>Space</kbd></p>
+            <p>Move: <kbd>A</kbd> <kbd>D</kbd><br>Jump: <kbd>W</kbd> / <kbd>Space</kbd></p>
           </div>
           <div class="guide-item" style="border-left:4px solid #58a6ff">
             <h4><span style="color:#58a6ff">●</span> Player 2 (Blue)</h4>
             <p>Move: <kbd>←</kbd> <kbd>→</kbd><br>Jump: <kbd>↑</kbd></p>
           </div>
-          <div class="guide-item" style="border-left:4px solid #a371f7">
-            <h4><span style="color:#a371f7">●</span> Player 3 (Purple)</h4>
+          <div class="guide-item" style="border-left:4px solid #bc8cff">
+            <h4><span style="color:#bc8cff">●</span> Player 3 (Purple)</h4>
             <p>Move: <kbd>J</kbd> <kbd>L</kbd><br>Jump: <kbd>I</kbd></p>
           </div>
           <div class="guide-item" style="border-left:4px solid #3fb950">
@@ -130,29 +130,28 @@
         <div class="guide-grid">
           <div class="guide-item">
             <h4>⚡ Speed Boost</h4>
-            <p>Gives 60% faster sprint speed for 7 seconds to evade or hunt down others.</p>
+            <p>Increases running speed by +60% for 7 seconds.</p>
           </div>
           <div class="guide-item">
             <h4>🛡 Energy Shield</h4>
-            <p>Absorbs one tag attempt completely and repels the attacker.</p>
+            <p>Blocks 1 tag attempt and deflects the chaser.</p>
           </div>
           <div class="guide-item">
             <h4>🦘 Super Jump</h4>
-            <p>Multiplies jump impulse by 1.7x to scale massive heights.</p>
+            <p>Increases jump power by +75% to leap across tiers.</p>
           </div>
           <div class="guide-item">
-            <h4>🔬 Shrink Mode</h4>
-            <p>Cuts your hitbox size by half, making you harder to catch.</p>
+            <h4>🔬 Shrink</h4>
+            <p>Halves your size to dodge incoming tags and squeeze through gaps.</p>
           </div>
         </div>
       </div>
       <div>
-        <h4 style="margin-bottom:8px;color:#e6edf3">Rules & Objectives</h4>
+        <h4 style="margin-bottom:8px;color:#e6edf3">Mechanics &amp; Rules</h4>
         <p style="font-size:13px;color:#8b949e;line-height:1.5">
-          • At any given time, one player is <strong>"IT"</strong> (highlighted in bright pulsing red with an arrow above).<br>
-          • Whoever is "IT" when the timer hits zero loses! Surviving runners win.<br>
-          • Bounce on orange launch pads for big leaps across platforms.<br>
-          • Falling off the map will respawn you back at the top center.
+          • One player is <strong>"IT"</strong> with a red glowing halo and overhead arrow.<br>
+          • <strong>Walk or land on orange jump pads</strong> to launch into the air.<br>
+          • When the clock runs out, whoever is <strong>"IT" loses</strong>, and everyone else wins!
         </p>
       </div>
     </div>
@@ -180,9 +179,9 @@ const MAPS = {
       {x: 650, y: 280, w: 500, h: 20}
     ],
     jumpPads: [
-      {x: 80, y: 960, w: 80, h: 40, power: 29},
-      {x: 1640, y: 960, w: 80, h: 40, power: 29},
-      {x: 860, y: 420, w: 80, h: 40, power: 27}
+      {x: 80, y: 960, w: 90, h: 40, power: 30},
+      {x: 1630, y: 960, w: 90, h: 40, power: 30},
+      {x: 855, y: 420, w: 90, h: 40, power: 28}
     ]
   },
   medium: {
@@ -197,9 +196,9 @@ const MAPS = {
       {x: 1300, y: 130, w: 300, h: 20}
     ],
     jumpPads: [
-      {x: 80, y: 1560, w: 90, h: 40, power: 31}, {x: 2730, y: 1560, w: 90, h: 40, power: 31},
-      {x: 1100, y: 940, w: 90, h: 40, power: 33}, {x: 1710, y: 1040, w: 90, h: 40, power: 33},
-      {x: 880, y: 640, w: 90, h: 40, power: 35}, {x: 2080, y: 640, w: 90, h: 40, power: 35}
+      {x: 60, y: 1560, w: 90, h: 40, power: 32}, {x: 2750, y: 1560, w: 90, h: 40, power: 32},
+      {x: 1105, y: 940, w: 90, h: 40, power: 34}, {x: 1705, y: 1040, w: 90, h: 40, power: 34},
+      {x: 885, y: 640, w: 90, h: 40, power: 35}, {x: 2085, y: 640, w: 90, h: 40, power: 35}
     ]
   },
   large: {
@@ -218,10 +217,10 @@ const MAPS = {
       {x: 1950, y: 150, w: 300, h: 20}
     ],
     jumpPads: [
-      {x: 100, y: 2210, w: 100, h: 40, power: 34}, {x: 4000, y: 2210, w: 100, h: 40, power: 34},
-      {x: 1000, y: 1910, w: 90, h: 40, power: 32}, {x: 3100, y: 1910, w: 90, h: 40, power: 32},
-      {x: 1350, y: 1560, w: 90, h: 40, power: 35}, {x: 2750, y: 1560, w: 90, h: 40, power: 35},
-      {x: 1550, y: 810, w: 90, h: 40, power: 36}, {x: 2550, y: 810, w: 90, h: 40, power: 36}
+      {x: 80, y: 2210, w: 100, h: 40, power: 36}, {x: 4020, y: 2210, w: 100, h: 40, power: 36},
+      {x: 1000, y: 1910, w: 90, h: 40, power: 33}, {x: 3100, y: 1910, w: 90, h: 40, power: 33},
+      {x: 1350, y: 1560, w: 90, h: 40, power: 36}, {x: 2750, y: 1560, w: 90, h: 40, power: 36},
+      {x: 1550, y: 810, w: 90, h: 40, power: 37}, {x: 2550, y: 810, w: 90, h: 40, power: 37}
     ]
   }
 };
@@ -234,13 +233,13 @@ const PLAYER_META = [
 ];
 
 const POWERUP_DEFS = [
-  {id: 'speed', color: '#ffa657', symbol: '⚡', name: 'Speed Boost', duration: 420},
-  {id: 'shield', color: '#58a6ff', symbol: '🛡', name: 'Shield', duration: 540},
-  {id: 'jump', color: '#bc8cff', symbol: '🦘', name: 'Super Jump', duration: 420},
-  {id: 'shrink', color: '#3fb950', symbol: '🔬', name: 'Shrink', duration: 420}
+  {id: 'speed', color: '#ffa657', symbol: '⚡', name: 'Speed Boost', duration: 420, effect: p => p.speedMul = 1.6},
+  {id: 'shield', color: '#58a6ff', symbol: '🛡', name: 'Shield', duration: 540, effect: p => p.shielded = true},
+  {id: 'jump', color: '#bc8cff', symbol: '🦘', name: 'Super Jump', duration: 420, effect: p => p.jumpMul = 1.75},
+  {id: 'shrink', color: '#3fb950', symbol: '🔬', name: 'Shrink', duration: 420, effect: p => { p.sizeMul = 0.55; p.radius = PLAYER_RADIUS * 0.55; }}
 ];
 
-// ===== STATE =====
+// ===== GAME STATE =====
 let canvas, ctx;
 let players = [], platforms = [], jumpPads = [], powerups = [], particles = [];
 let camera = {x: 0, y: 0, zoom: 1, targetZoom: 1};
@@ -251,38 +250,36 @@ let keys = {}, lastTime = 0;
 const GRAVITY = 0.9, FRICTION = 0.85, AIR_FRICTION = 0.96;
 const BASE_SPEED = 5.5, BASE_JUMP = 22, PLAYER_RADIUS = 24;
 
-// ===== DOM ELEMENTS =====
+// ===== DOM SELECTORS =====
 const $ = id => document.getElementById(id);
 const totalPlayersSel = $('totalPlayers'), humanCountSel = $('humanCount'), timeLimitIn = $('timeLimit'), timeVal = $('timeVal'), mapSizeSel = $('mapSize'), startBtn = $('startBtn');
 const menu = $('menu'), ui = $('ui'), gameoverEl = $('gameover'), winnerText = $('winnerText'), timerEl = $('timer'), playersInfo = $('players-info'), hudEl = $('hud');
 const guideModal = $('guideModal'), guideBtn = $('guideBtn'), closeGuide = $('closeGuide');
 
-// ===== CONTROLS MATRIX =====
-function isLeftPressed(id) {
-  if (id === 0) return keys['KeyA'];
-  if (id === 1) return keys['ArrowLeft'];
-  if (id === 2) return keys['KeyJ'];
-  if (id === 3) return keys['KeyF'];
+// ===== INPUT HANDLING =====
+function isLeft(id) {
+  if (id === 0) return !!keys['KeyA'];
+  if (id === 1) return !!keys['ArrowLeft'];
+  if (id === 2) return !!keys['KeyJ'];
+  if (id === 3) return !!keys['KeyF'];
+  return false;
+}
+function isRight(id) {
+  if (id === 0) return !!keys['KeyD'];
+  if (id === 1) return !!keys['ArrowRight'];
+  if (id === 2) return !!keys['KeyL'];
+  if (id === 3) return !!keys['KeyH'];
+  return false;
+}
+function isJump(id) {
+  if (id === 0) return !!(keys['KeyW'] || keys['Space']);
+  if (id === 1) return !!keys['ArrowUp'];
+  if (id === 2) return !!keys['KeyI'];
+  if (id === 3) return !!keys['KeyT'];
   return false;
 }
 
-function isRightPressed(id) {
-  if (id === 0) return keys['KeyD'];
-  if (id === 1) return keys['ArrowRight'];
-  if (id === 2) return keys['KeyL'];
-  if (id === 3) return keys['KeyH'];
-  return false;
-}
-
-function isJumpPressed(id) {
-  if (id === 0) return keys['KeyW'] || keys['Space'];
-  if (id === 1) return keys['ArrowUp'];
-  if (id === 2) return keys['KeyI'];
-  if (id === 3) return keys['KeyT'];
-  return false;
-}
-
-// ===== SETUP & EVENTS =====
+// ===== INIT =====
 window.addEventListener('load', () => {
   canvas = $('c');
   ctx = canvas.getContext('2d');
@@ -291,8 +288,8 @@ window.addEventListener('load', () => {
 
   window.addEventListener('keydown', e => {
     keys[e.code] = true;
-    const blocked = ['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD','KeyI','KeyJ','KeyK','KeyL','KeyT','KeyF','KeyG','KeyH'];
-    if (blocked.includes(e.code) && gameRunning) e.preventDefault();
+    const preventCodes = ['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD','KeyI','KeyJ','KeyK','KeyL','KeyT','KeyF','KeyG','KeyH'];
+    if (preventCodes.includes(e.code) && gameRunning) e.preventDefault();
   });
   window.addEventListener('keyup', e => { keys[e.code] = false; });
 
@@ -304,7 +301,7 @@ window.addEventListener('load', () => {
     for (let i = 1; i <= total; i++) {
       const opt = document.createElement('option');
       opt.value = i;
-      opt.textContent = i === 1 ? '1 Player (You vs Bots)' : (i === total ? `${i} Players (All Humans!)` : `${i} Humans + ${total - i} Bot(s)`);
+      opt.textContent = i === 1 ? '1 Player (Solo vs Bots)' : (i === total ? `${i} Players (All Humans!)` : `${i} Humans + ${total - i} Bot(s)`);
       if (i === total) opt.selected = true;
       humanCountSel.appendChild(opt);
     }
@@ -325,7 +322,7 @@ function resize() {
   canvas.height = window.innerHeight;
 }
 
-// ===== GAME INITIALIZATION =====
+// ===== START MATCH =====
 function startGame() {
   totalPlayers = +totalPlayersSel.value;
   humanPlayers = +humanCountSel.value;
@@ -367,7 +364,15 @@ function startGame() {
       shrinkTimer: 0,
       tagCooldown: 0,
       invuln: 0,
-      input: {left: false, right: false, jump: false}
+      input: {left: false, right: false, jump: false},
+      // AI Brain & Unstuck Variables
+      aiTargetId: -1,
+      aiTargetTimer: 0,
+      stuckTimer: 0,
+      lastX: s.x,
+      lastY: s.y,
+      unstuckDir: 0,
+      unstuckTicks: 0
     });
   }
 
@@ -375,11 +380,12 @@ function startGame() {
   players[itIndex].invuln = 100;
 
   menu.style.display = 'none';
+  gameoverEl.style.display = 'none';
   ui.style.display = 'flex';
   hudEl.style.display = 'flex';
   buildHud();
 
-  spawnDistributedPowerups(map, 6 + totalPlayers * 2);
+  spawnRandomPowerups(map, 6 + totalPlayers * 2);
   lastTime = performance.now();
 }
 
@@ -395,34 +401,54 @@ function buildHud() {
 
 function generateSpawns(map, count) {
   const chosen = [];
-  const candidatePlats = map.platforms.filter(p => p.w >= 200 && p.y < map.h - 150);
-  const step = Math.max(1, Math.floor(candidatePlats.length / count));
+  const candidatePlats = map.platforms.filter(p => p.w >= 180 && p.y < map.h - 100);
   for (let i = 0; i < count; i++) {
-    const plat = candidatePlats[(i * step) % candidatePlats.length];
-    chosen.push({x: plat.x + plat.w / 2, y: plat.y - 60});
+    const plat = candidatePlats[Math.floor(Math.random() * candidatePlats.length)];
+    chosen.push({
+      x: plat.x + 30 + Math.random() * (plat.w - 60),
+      y: plat.y - 50
+    });
   }
   return chosen;
 }
 
-// Power-ups spread evenly across the full arena
-function spawnDistributedPowerups(map, count) {
-  const validPlats = map.platforms.filter(p => p.w >= 140 && p.y < map.h - 80);
-  if (!validPlats.length) return;
+// ===== RANDOM & SPREAD OUT POWERUP SPAWNING =====
+function getRandomPowerupPosition(map, existingPowerups) {
+  const candidatePlats = map.platforms.filter(p => p.w >= 140 && p.y < map.h - 80);
+  let bestSpot = null;
+  let maxMinDist = -1;
 
-  const sorted = [...validPlats].sort((a, b) => a.x - b.x);
-  const stride = Math.max(1, Math.floor(sorted.length / count));
+  // Attempt several random spots and pick the one farthest from other active powerups
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const plat = candidatePlats[Math.floor(Math.random() * candidatePlats.length)];
+    const padMargin = 40;
+    const x = plat.x + padMargin + Math.random() * Math.max(20, plat.w - padMargin * 2);
+    const y = plat.y - 38;
 
+    let minDist = Infinity;
+    existingPowerups.forEach(pu => {
+      const d = Math.hypot(pu.x - x, pu.y - y);
+      if (d < minDist) minDist = d;
+    });
+
+    if (minDist > maxMinDist) {
+      maxMinDist = minDist;
+      bestSpot = {x, y, plat};
+    }
+  }
+
+  return bestSpot || {x: map.w / 2, y: map.h - 200};
+}
+
+function spawnRandomPowerups(map, count) {
+  powerups = [];
   for (let i = 0; i < count; i++) {
-    const plat = sorted[(i * stride + Math.floor(Math.random() * stride)) % sorted.length];
-    const type = POWERUP_DEFS[i % POWERUP_DEFS.length];
-    const offset = 30 + Math.random() * (plat.w - 60);
-    const px = plat.x + offset;
-    const py = plat.y - 42;
-
+    const type = POWERUP_DEFS[Math.floor(Math.random() * POWERUP_DEFS.length)];
+    const pos = getRandomPowerupPosition(map, powerups);
     powerups.push({
-      x: px,
-      y: py,
-      baseY: py,
+      x: pos.x,
+      y: pos.y,
+      baseY: pos.y,
       type,
       collected: false,
       respawn: 0,
@@ -431,7 +457,7 @@ function spawnDistributedPowerups(map, count) {
   }
 }
 
-// ===== MAIN LOOP =====
+// ===== MAIN GAME LOOP =====
 function loop(now) {
   const dt = Math.min(32, now - lastTime) / 16.67;
   lastTime = now;
@@ -449,33 +475,38 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 
-// ===== UPDATE =====
+// ===== UPDATE LOGIC =====
 function update(dt) {
-  // Capture inputs
+  // Capture inputs for human players
   players.forEach(p => {
     if (!p.isBot) {
-      p.input.left = isLeftPressed(p.id);
-      p.input.right = isRightPressed(p.id);
-      p.input.jump = isJumpPressed(p.id) && p.grounded;
-    } else {
-      updateBot(p, dt);
+      p.input.left = isLeft(p.id);
+      p.input.right = isRight(p.id);
+      p.input.jump = isJump(p.id) && p.grounded;
     }
   });
 
+  // Run AI decisions
+  players.forEach(p => {
+    if (p.isBot) updateBot(p, dt);
+  });
+
+  // Physics, Platform & Pad collisions
   players.forEach(p => updatePlayer(p, dt));
   players.forEach(p => checkPlatformCollisions(p));
-  players.forEach(p => checkJumpPads(p));
+  players.forEach(p => checkJumpPadCollisions(p));
 
+  // Power-ups
   updatePowerups(dt);
   players.forEach(p => checkPowerupCollisions(p));
 
+  // Tagging
   handleTagging();
 
-  // Cooldowns and powerup timers
+  // Buff Timers
   players.forEach(p => {
     if (p.tagCooldown > 0) p.tagCooldown -= dt;
     if (p.invuln > 0) p.invuln -= dt;
-
     if (p.shieldTimer > 0) {
       p.shieldTimer -= dt;
       if (p.shieldTimer <= 0) p.shielded = false;
@@ -497,41 +528,40 @@ function update(dt) {
     }
   });
 
+  // Camera & FX
   updateCamera();
-
-  // Particles
   particles.forEach(pt => {
     pt.x += pt.vx;
     pt.y += pt.vy;
-    pt.vy += 0.25;
+    pt.vy += 0.22;
     pt.life -= dt;
     pt.alpha = Math.max(0, pt.life / pt.maxLife);
   });
   particles = particles.filter(pt => pt.life > 0);
 }
 
+// ===== PLAYER PHYSICS =====
 function updatePlayer(p, dt) {
   const speed = BASE_SPEED * p.speedMul;
-  const accel = p.grounded ? 1.0 : 0.65;
   const friction = p.grounded ? FRICTION : AIR_FRICTION;
 
-  if (p.input.left) p.vx -= speed * accel;
-  if (p.input.right) p.vx += speed * accel;
+  if (p.input.left) p.vx -= speed * (p.grounded ? 1 : 0.65);
+  if (p.input.right) p.vx += speed * (p.grounded ? 1 : 0.65);
 
   p.vx *= friction;
-  const maxVel = BASE_SPEED * 1.9 * p.speedMul;
-  p.vx = Math.max(-maxVel, Math.min(maxVel, p.vx));
+  const maxSpd = BASE_SPEED * 1.85 * p.speedMul;
+  p.vx = Math.max(-maxSpd, Math.min(maxSpd, p.vx));
   p.x += p.vx;
 
-  if (p.vx > 0.1) p.facing = 1;
-  else if (p.vx < -0.1) p.facing = -1;
+  if (p.vx > 0.2) p.facing = 1;
+  else if (p.vx < -0.2) p.facing = -1;
 
   p.vy += GRAVITY;
   if (p.input.jump && p.grounded) {
     p.vy = -BASE_JUMP * p.jumpMul;
     p.grounded = false;
     p.input.jump = false;
-    spawnJumpParticles(p.x, p.y + p.radius, p.color);
+    spawnJumpParticles(p.x, p.y + p.radius);
   }
   p.y += p.vy;
 
@@ -539,18 +569,19 @@ function updatePlayer(p, dt) {
   if (p.x < p.radius) { p.x = p.radius; p.vx = 0; }
   if (p.x > map.w - p.radius) { p.x = map.w - p.radius; p.vx = 0; }
 
-  // Void respawn
-  if (p.y > map.h + 200) {
-    respawnPlayer(p);
+  // Fall off bottom respawn
+  if (p.y > map.h + 150) {
+    respawnPlayer(p, map);
   }
 }
 
 function checkPlatformCollisions(p) {
   p.grounded = false;
   platforms.forEach(pl => {
+    // Top-surface landing
     if (
-      p.x + p.radius > pl.x &&
-      p.x - p.radius < pl.x + pl.w &&
+      p.x + p.radius * 0.7 > pl.x &&
+      p.x - p.radius * 0.7 < pl.x + pl.w &&
       p.y + p.radius >= pl.y &&
       p.y + p.radius <= pl.y + 24 &&
       p.vy >= 0
@@ -562,21 +593,24 @@ function checkPlatformCollisions(p) {
   });
 }
 
-function checkJumpPads(p) {
+// ===== INSTANT WALK-ON JUMP PADS =====
+function checkJumpPadCollisions(p) {
   jumpPads.forEach(jp => {
+    // Cooldown check
     if (!jp.active) return;
-    if (
-      p.x + p.radius > jp.x &&
-      p.x - p.radius < jp.x + jp.w &&
-      p.y + p.radius >= jp.y &&
-      p.y - p.radius < jp.y + jp.h &&
-      p.vy > 0
-    ) {
+
+    // Check if player's bounds overlap with the jump pad horizontally & vertically
+    const horizOverlap = (p.x + p.radius > jp.x) && (p.x - p.radius < jp.x + jp.w);
+    const vertOverlap = (p.y + p.radius >= jp.y - 6) && (p.y - p.radius <= jp.y + jp.h);
+
+    if (horizOverlap && vertOverlap) {
+      // Launch whether walking horizontally across it OR falling onto it!
       p.vy = -jp.power;
       p.grounded = false;
       jp.active = false;
-      jp.cooldown = 70;
-      spawnJumpParticles(jp.x + jp.w / 2, jp.y, '#ffa657');
+      jp.cooldown = 45; // brief recharge
+
+      spawnJumpPadParticles(jp.x + jp.w / 2, jp.y, p.color);
     }
   });
 
@@ -588,11 +622,19 @@ function checkJumpPads(p) {
   });
 }
 
+// ===== POWERUP LOGIC =====
 function updatePowerups(dt) {
+  const map = MAPS[mapSize];
   powerups.forEach(pu => {
     if (pu.collected) {
       pu.respawn -= dt;
       if (pu.respawn <= 0) {
+        // Respawn in a fresh random location!
+        const newPos = getRandomPowerupPosition(map, powerups.filter(other => !other.collected));
+        pu.x = newPos.x;
+        pu.y = newPos.y;
+        pu.baseY = newPos.y;
+        pu.type = POWERUP_DEFS[Math.floor(Math.random() * POWERUP_DEFS.length)];
         pu.collected = false;
         pu.respawn = 0;
       }
@@ -606,164 +648,242 @@ function updatePowerups(dt) {
 function checkPowerupCollisions(p) {
   powerups.forEach(pu => {
     if (pu.collected) return;
-    const dx = p.x - pu.x, dy = p.y - pu.y;
-    if (dx * dx + dy * dy < (p.radius + 22) * (p.radius + 22)) {
+    const dist = Math.hypot(p.x - pu.x, p.y - pu.y);
+    if (dist < p.radius + 20) {
       pu.collected = true;
-      pu.respawn = 600; // Respawns in ~10 seconds
+      pu.respawn = 520; // ~8.5 seconds
       applyPowerup(p, pu.type);
-      spawnCollectParticles(p.x, p.y, pu.type.color);
+      spawnCollectParticles(pu.x, pu.y, pu.type.color);
     }
   });
 }
 
 function applyPowerup(p, type) {
-  if (type.id === 'speed') {
-    p.speedMul = 1.6;
-    p.speedTimer = type.duration;
-  } else if (type.id === 'shield') {
-    p.shielded = true;
-    p.shieldTimer = type.duration;
-  } else if (type.id === 'jump') {
-    p.jumpMul = 1.7;
-    p.jumpTimer = type.duration;
-  } else if (type.id === 'shrink') {
-    p.sizeMul = 0.55;
-    p.radius = PLAYER_RADIUS * 0.55;
-    p.shrinkTimer = type.duration;
-  }
+  type.effect(p);
+  if (type.id === 'speed') p.speedTimer = type.duration;
+  if (type.id === 'shield') p.shieldTimer = type.duration;
+  if (type.id === 'jump') p.jumpTimer = type.duration;
+  if (type.id === 'shrink') p.shrinkTimer = type.duration;
 }
 
+// ===== TAGGING MECHANIC =====
 function handleTagging() {
   const it = players[itIndex];
   if (!it || it.tagCooldown > 0) return;
 
   for (let i = 0; i < players.length; i++) {
     if (i === itIndex) continue;
-    const other = players[i];
-    if (other.invuln > 0) continue;
+    const target = players[i];
+    if (target.invuln > 0) continue;
 
-    const dx = it.x - other.x;
-    const dy = it.y - other.y;
-    const dist = Math.hypot(dx, dy);
-
-    if (dist < it.radius + other.radius) {
-      if (other.shielded) {
-        other.shielded = false;
-        other.shieldTimer = 0;
+    const dist = Math.hypot(it.x - target.x, it.y - target.y);
+    if (dist < it.radius + target.radius) {
+      if (target.shielded) {
+        // Shield absorbs tag and pushes attacker back
+        target.shielded = false;
+        target.shieldTimer = 0;
         it.tagCooldown = 40;
-        // Shield repel impact
-        const angle = Math.atan2(it.y - other.y, it.x - other.x);
-        it.vx = Math.cos(angle) * 16;
-        it.vy = -10;
-        spawnCollectParticles(other.x, other.y, '#58a6ff');
+        it.vx = (it.x < target.x ? -10 : 10);
+        it.vy = -8;
+        spawnTagParticles(target.x, target.y, '#58a6ff');
         return;
       }
 
-      it.tagCooldown = 40;
-      other.tagCooldown = 40;
-      const oldIt = itIndex;
+      // Successful tag!
+      const prevIt = itIndex;
       itIndex = i;
-      players[oldIt].invuln = 70;
-      players[itIndex].invuln = 110;
-      spawnTagParticles((it.x + other.x) / 2, (it.y + other.y) / 2, it.color);
+      players[prevIt].tagCooldown = 35;
+      players[prevIt].invuln = 70;
+      players[itIndex].tagCooldown = 35;
+      players[itIndex].invuln = 90;
+
+      spawnTagParticles((it.x + target.x) / 2, (it.y + target.y) / 2, it.color);
       break;
     }
   }
 }
 
-function respawnPlayer(p) {
-  const map = MAPS[mapSize];
-  p.x = map.w / 2 + (Math.random() - 0.5) * 400;
-  p.y = 120;
-  p.vx = 0;
-  p.vy = 0;
-  p.invuln = 90;
-}
-
-// ===== BOT AI =====
+// ===== ENHANCED AI WITH DYNAMIC TARGETING & UNSTUCK =====
 function updateBot(bot, dt) {
-  const it = players[itIndex];
   const isIt = bot.id === itIndex;
-  const target = isIt ? findNearestRunner(bot) : findSafeHaven(bot, it);
+  const itPlayer = players[itIndex];
 
-  if (!target) {
+  // 1. UNSTUCK MECHANIC
+  const movedDist = Math.hypot(bot.x - bot.lastX, bot.y - bot.lastY);
+  bot.lastX = bot.x;
+  bot.lastY = bot.y;
+
+  if (movedDist < 1.2 && (bot.input.left || bot.input.right)) {
+    bot.stuckTimer += dt;
+  } else {
+    bot.stuckTimer = Math.max(0, bot.stuckTimer - dt * 1.5);
+  }
+
+  // Active unstuck overrides
+  if (bot.unstuckTicks > 0) {
+    bot.unstuckTicks -= dt;
+    bot.input.left = bot.unstuckDir < 0;
+    bot.input.right = bot.unstuckDir > 0;
+    if (bot.grounded && Math.random() < 0.25) bot.input.jump = true;
+    return;
+  }
+
+  // Trigger unstuck evasive maneuver
+  if (bot.stuckTimer > 20) {
+    bot.stuckTimer = 0;
+    bot.unstuckTicks = 35 + Math.random() * 25;
+    bot.unstuckDir = bot.facing > 0 ? -1 : 1;
+    if (bot.grounded) bot.input.jump = true;
+    return;
+  }
+
+  // 2. DYNAMIC TARGETING (Target other bots & humans dynamically!)
+  let destination = null;
+
+  if (isIt) {
+    // Decrement retarget timer or find a target
+    bot.aiTargetTimer -= dt;
+    if (bot.aiTargetTimer <= 0 || bot.aiTargetId === -1 || bot.aiTargetId === bot.id) {
+      bot.aiTargetTimer = 120 + Math.random() * 150; // Switch targets every 2-4 seconds
+
+      // Score each candidate (bots & humans alike)
+      let bestScore = -Infinity;
+      let chosenId = -1;
+
+      players.forEach(candidate => {
+        if (candidate.id === bot.id) return;
+        const d = Math.hypot(candidate.x - bot.x, candidate.y - bot.y);
+        // Base score: closer is better, unshielded is better, plus small randomness
+        let score = 2500 - d;
+        if (!candidate.shielded) score += 400;
+        if (candidate.isBot) score += 200 * Math.random(); // AI will happily hunt other bots!
+        else score += 200 * Math.random();
+
+        if (score > bestScore) {
+          bestScore = score;
+          chosenId = candidate.id;
+        }
+      });
+
+      bot.aiTargetId = chosenId;
+    }
+
+    const currentTarget = players[bot.aiTargetId];
+    if (currentTarget) {
+      destination = {x: currentTarget.x, y: currentTarget.y};
+    }
+  } else {
+    // RUNNER AI: evade IT, or grab nearby powerup
+    destination = findRunnerSafeSpot(bot, itPlayer);
+  }
+
+  if (!destination) {
     bot.input.left = bot.input.right = bot.input.jump = false;
     return;
   }
 
-  const dx = target.x - bot.x;
-  const dy = target.y - bot.y;
+  // 3. STEERING & JUMPING
+  const dx = destination.x - bot.x;
+  const dy = destination.y - bot.y;
   const dist = Math.hypot(dx, dy);
 
-  if (Math.abs(dx) > 18) {
+  if (Math.abs(dx) > 22) {
     bot.input.left = dx < 0;
     bot.input.right = dx > 0;
   } else {
     bot.input.left = bot.input.right = false;
   }
 
-  const padAhead = jumpPads.some(jp => jp.active && Math.abs(bot.x - (jp.x + jp.w / 2)) < 90 && bot.y > jp.y && bot.y - jp.y < 220);
-  const jumpNeeded = dy < -50 || (dy < -20 && dist < 140) || (isIt && dist < 180 && dy < 40);
+  // Smart Jump: if target is above, or wall ahead, or jumping to pad
+  const jumpPadAhead = jumpPads.some(jp => jp.active && Math.abs(bot.x - (jp.x + jp.w / 2)) < 80 && Math.abs(bot.y - jp.y) < 70);
+  const wallAhead = platforms.some(pl => {
+    const aheadX = bot.x + (bot.facing > 0 ? bot.radius + 18 : -bot.radius - 18);
+    return aheadX >= pl.x && aheadX <= pl.x + pl.w && bot.y >= pl.y - 15 && bot.y <= pl.y + pl.h;
+  });
 
-  bot.input.jump = bot.grounded && (jumpNeeded || padAhead);
+  const wantsVerticalRise = (dy < -50) || (dy < -20 && dist < 140) || (isIt && dy < 20 && dist < 160);
 
-  // Unstuck jump
-  if (bot.grounded && Math.abs(bot.vx) < 0.4 && (bot.input.left || bot.input.right)) {
+  if (bot.grounded && (wantsVerticalRise || jumpPadAhead || wallAhead)) {
     bot.input.jump = true;
+  } else {
+    bot.input.jump = false;
   }
 }
 
-function findNearestRunner(bot) {
-  let nearest = null, minDist = Infinity;
-  players.forEach(p => {
-    if (p.id === bot.id) return;
-    const d = Math.hypot(p.x - bot.x, p.y - bot.y);
-    if (d < minDist) { minDist = d; nearest = p; }
-  });
-  return nearest;
-}
+function findRunnerSafeSpot(bot, itPlayer) {
+  if (!itPlayer) return {x: bot.x, y: bot.y};
 
-function findSafeHaven(bot, itPlayer) {
-  if (!itPlayer) return null;
-  let best = null, bestScore = -Infinity;
-  const map = MAPS[mapSize];
-  const candidates = [
-    ...map.platforms.map(p => ({x: p.x + p.w / 2, y: p.y - 45})),
-    {x: 200, y: map.h - 120},
-    {x: map.w - 200, y: map.h - 120}
-  ];
-
-  candidates.forEach(pt => {
-    const dIt = Math.hypot(pt.x - itPlayer.x, pt.y - itPlayer.y);
-    const dBot = Math.hypot(pt.x - bot.x, pt.y - bot.y);
-    const score = dIt * 1.6 - dBot * 0.45;
-    if (score > bestScore) {
-      bestScore = score;
-      best = pt;
+  // Check for safe nearby power-up
+  let closestPowerup = null;
+  let bestPuDist = 450;
+  powerups.forEach(pu => {
+    if (pu.collected) return;
+    const dBot = Math.hypot(pu.x - bot.x, pu.y - bot.y);
+    const dIt = Math.hypot(pu.x - itPlayer.x, pu.y - itPlayer.y);
+    if (dBot < bestPuDist && dIt > 250) {
+      bestPuDist = dBot;
+      closestPowerup = pu;
     }
   });
-  return best;
+
+  if (closestPowerup) {
+    return {x: closestPowerup.x, y: closestPowerup.y};
+  }
+
+  // Flee away from "IT"
+  const map = MAPS[mapSize];
+  const candidateSpots = [
+    ...map.platforms.filter(p => p.w >= 180).map(p => ({x: p.x + p.w / 2, y: p.y - 45})),
+    {x: 150, y: map.h - 120},
+    {x: map.w - 150, y: map.h - 120}
+  ];
+
+  let bestSpot = null;
+  let bestScore = -Infinity;
+
+  candidateSpots.forEach(s => {
+    const dFromIt = Math.hypot(s.x - itPlayer.x, s.y - itPlayer.y);
+    const dFromBot = Math.hypot(s.x - bot.x, s.y - bot.y);
+    // Score favors maximum distance from IT, and platform elevation
+    const score = dFromIt * 2.0 - dFromBot * 0.7 + (map.h - s.y) * 0.15;
+    if (score > bestScore) {
+      bestScore = score;
+      bestSpot = s;
+    }
+  });
+
+  return bestSpot;
+}
+
+function respawnPlayer(p, map) {
+  p.x = map.w / 2 + (Math.random() - 0.5) * 400;
+  p.y = 120;
+  p.vx = 0;
+  p.vy = 0;
+  p.invuln = 80;
 }
 
 // ===== CAMERA =====
 function updateCamera() {
   if (!players.length) return;
   let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+
   players.forEach(p => {
-    minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
-    minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+    minX = Math.min(minX, p.x);
+    maxX = Math.max(maxX, p.x);
+    minY = Math.min(minY, p.y);
+    maxY = Math.max(maxY, p.y);
   });
 
   const cx = (minX + maxX) / 2;
   const cy = (minY + maxY) / 2;
-  const spreadX = maxX - minX;
-  const spreadY = maxY - minY;
-  const pad = 160;
+  const spanX = maxX - minX + 320;
+  const spanY = maxY - minY + 320;
 
-  const reqZoomX = canvas.width / (spreadX + pad * 2);
-  const reqZoomY = canvas.height / (spreadY + pad * 2);
+  const reqZoomX = canvas.width / spanX;
+  const reqZoomY = canvas.height / spanY;
+  camera.targetZoom = Math.min(1.15, Math.max(0.3, Math.min(reqZoomX, reqZoomY)));
 
-  camera.targetZoom = Math.min(1.15, Math.max(0.28, Math.min(reqZoomX, reqZoomY)));
   camera.zoom += (camera.targetZoom - camera.zoom) * 0.08;
   camera.x += (cx - camera.x) * 0.1;
   camera.y += (cy - camera.y) * 0.1;
@@ -781,7 +901,7 @@ function render() {
   ctx.scale(camera.zoom, camera.zoom);
   ctx.translate(-camera.x, -camera.y);
 
-  drawGridBackground();
+  drawMapGrid();
   drawPlatforms();
   drawJumpPads();
   drawPowerups();
@@ -789,14 +909,14 @@ function render() {
   players.forEach(drawPlayer);
 
   ctx.restore();
-  updateUI();
+  drawUI();
 }
 
-function drawGridBackground() {
+function drawMapGrid() {
   const map = MAPS[mapSize];
-  ctx.strokeStyle = '#161b22';
-  ctx.lineWidth = 1.5 / camera.zoom;
-  const step = 80;
+  ctx.strokeStyle = '#161d27';
+  ctx.lineWidth = 1.2 / camera.zoom;
+  const step = 120;
   for (let x = 0; x <= map.w; x += step) {
     ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, map.h); ctx.stroke();
   }
@@ -811,131 +931,147 @@ function drawGridBackground() {
 function drawPlatforms() {
   platforms.forEach(p => {
     ctx.fillStyle = '#21262d';
-    ctx.fillRect(p.x, p.y, p.w, p.h);
-
-    ctx.strokeStyle = '#388bfd';
-    ctx.lineWidth = 2 / camera.zoom;
     ctx.beginPath();
-    ctx.moveTo(p.x, p.y);
-    ctx.lineTo(p.x + p.w, p.y);
+    ctx.roundRect(p.x, p.y, p.w, p.h, 6);
+    ctx.fill();
+
+    ctx.strokeStyle = '#38414e';
+    ctx.lineWidth = 2 / camera.zoom;
     ctx.stroke();
 
-    ctx.strokeStyle = '#30363d';
-    ctx.strokeRect(p.x, p.y, p.w, p.h);
+    // Subtle neon highlight strip on top
+    ctx.fillStyle = '#30363d';
+    ctx.fillRect(p.x + 4, p.y, p.w - 8, 3);
   });
 }
 
 function drawJumpPads() {
   jumpPads.forEach(jp => {
-    ctx.fillStyle = jp.active ? '#ffa657' : '#30363d';
-    ctx.fillRect(jp.x, jp.y + 15, jp.w, jp.h - 15);
-
-    if (jp.active) {
-      ctx.fillStyle = '#ff7b72';
+    if (!jp.active) {
+      ctx.fillStyle = '#30363d66';
       ctx.beginPath();
-      ctx.roundRect(jp.x + 6, jp.y + 4, jp.w - 12, 12, 4);
+      ctx.roundRect(jp.x, jp.y, jp.w, jp.h, 8);
       ctx.fill();
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = `bold 14px sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.fillText('▲', jp.x + jp.w / 2, jp.y + 15);
+      return;
     }
+
+    const grad = ctx.createLinearGradient(jp.x, jp.y, jp.x, jp.y + jp.h);
+    grad.addColorStop(0, '#ff9900');
+    grad.addColorStop(1, '#d84a00');
+
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect(jp.x, jp.y, jp.w, jp.h, 8);
+    ctx.fill();
+
+    ctx.strokeStyle = '#ffc04d';
+    ctx.lineWidth = 2 / camera.zoom;
+    ctx.stroke();
+
+    // Arrows on the jump pad
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 16px system-ui';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('▲ ▲', jp.x + jp.w / 2, jp.y + jp.h / 2);
   });
 }
 
 function drawPowerups() {
   powerups.forEach(pu => {
     if (pu.collected) return;
-    ctx.save();
-    ctx.translate(pu.x, pu.y);
 
-    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    // Glowing aura
     ctx.beginPath();
-    ctx.arc(0, 0, 20, 0, Math.PI * 2);
+    ctx.arc(pu.x, pu.y, 22, 0, Math.PI * 2);
+    ctx.fillStyle = pu.type.color + '33';
     ctx.fill();
 
-    ctx.strokeStyle = pu.type.color;
-    ctx.lineWidth = 3 / camera.zoom;
+    // Icon Circle
     ctx.beginPath();
-    ctx.arc(0, 0, 18, 0, Math.PI * 2);
+    ctx.arc(pu.x, pu.y, 16, 0, Math.PI * 2);
+    ctx.fillStyle = pu.type.color;
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
     ctx.stroke();
 
-    ctx.font = '18px sans-serif';
+    // Symbol
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '16px system-ui';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(pu.type.symbol, 0, 1);
-
-    ctx.restore();
+    ctx.fillText(pu.type.symbol, pu.x, pu.y + 1);
   });
 }
 
 function drawPlayer(p) {
   const isIt = p.id === itIndex;
 
-  ctx.save();
-  ctx.translate(p.x, p.y);
-
   // Invulnerability blink
-  if (p.invuln > 0 && Math.floor(p.invuln / 6) % 2 === 0) {
-    ctx.globalAlpha = 0.4;
-  }
+  if (p.invuln > 0 && Math.floor(p.invuln / 6) % 2 === 0) return;
 
-  // Aura for IT player
+  // Pulsing "IT" Halo & Target Arrow
   if (isIt) {
-    ctx.strokeStyle = '#f85149';
-    ctx.lineWidth = 4 / camera.zoom;
     ctx.beginPath();
-    ctx.arc(0, 0, p.radius + 6, 0, Math.PI * 2);
-    ctx.stroke();
+    ctx.arc(p.x, p.y, p.radius + 12 + Math.sin(Date.now() * 0.01) * 3, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(248, 81, 73, 0.25)';
+    ctx.fill();
 
-    // "IT" indicator arrow
+    // Floating IT arrow
     ctx.fillStyle = '#f85149';
     ctx.beginPath();
-    ctx.moveTo(0, -p.radius - 22);
-    ctx.lineTo(-9, -p.radius - 36);
-    ctx.lineTo(9, -p.radius - 36);
+    const arrowY = p.y - p.radius - 24 + Math.sin(Date.now() * 0.012) * 5;
+    ctx.moveTo(p.x, arrowY + 10);
+    ctx.lineTo(p.x - 8, arrowY);
+    ctx.lineTo(p.x + 8, arrowY);
     ctx.closePath();
     ctx.fill();
+
+    ctx.font = 'bold 11px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('IT', p.x, arrowY - 6);
   }
 
-  // Shield bubble
+  // Active Shield Bubble
   if (p.shielded) {
-    ctx.strokeStyle = '#58a6ff';
-    ctx.lineWidth = 3 / camera.zoom;
     ctx.beginPath();
-    ctx.arc(0, 0, p.radius + 8, 0, Math.PI * 2);
+    ctx.arc(p.x, p.y, p.radius + 8, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(88, 166, 255, 0.3)';
+    ctx.fill();
+    ctx.strokeStyle = '#58a6ff';
+    ctx.lineWidth = 2 / camera.zoom;
     ctx.stroke();
   }
 
-  // Main body
-  ctx.fillStyle = p.color;
+  // Player Body
   ctx.beginPath();
-  ctx.arc(0, 0, p.radius, 0, Math.PI * 2);
+  ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+  ctx.fillStyle = p.color;
   ctx.fill();
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 2 / camera.zoom;
+  ctx.strokeStyle = isIt ? '#ffffff' : '#161b22';
+  ctx.lineWidth = (isIt ? 3 : 2) / camera.zoom;
   ctx.stroke();
 
-  // Eyes
+  // Eyes (Face direction)
+  const eyeOffset = p.facing * (p.radius * 0.35);
   ctx.fillStyle = '#ffffff';
-  const eyeOffset = p.facing * 7;
   ctx.beginPath();
-  ctx.arc(eyeOffset, -4, 5 * p.sizeMul, 0, Math.PI * 2);
+  ctx.arc(p.x + eyeOffset - 4, p.y - 4, p.radius * 0.22, 0, Math.PI * 2);
+  ctx.arc(p.x + eyeOffset + 4, p.y - 4, p.radius * 0.22, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.fillStyle = '#0d1117';
   ctx.beginPath();
-  ctx.arc(eyeOffset + p.facing * 2, -4, 2.5 * p.sizeMul, 0, Math.PI * 2);
+  ctx.arc(p.x + eyeOffset - 3 + p.facing * 1.5, p.y - 4, p.radius * 0.11, 0, Math.PI * 2);
+  ctx.arc(p.x + eyeOffset + 5 + p.facing * 1.5, p.y - 4, p.radius * 0.11, 0, Math.PI * 2);
   ctx.fill();
 
-  // Name tag
-  ctx.font = 'bold 11px system-ui';
-  ctx.fillStyle = '#e6edf3';
+  // Name Tag
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `600 ${Math.max(10, 12 / camera.zoom)}px system-ui`;
   ctx.textAlign = 'center';
-  ctx.fillText(p.isBot ? `${p.name} [BOT]` : p.name, 0, p.radius + 16);
-
-  ctx.restore();
+  ctx.fillText(p.name + (p.isBot ? ' (AI)' : ''), p.x, p.y - p.radius - 8);
 }
 
 function drawParticle(pt) {
@@ -948,17 +1084,50 @@ function drawParticle(pt) {
   ctx.restore();
 }
 
-// ===== PARTICLES =====
-function spawnJumpParticles(x, y, color) {
-  for (let i = 0; i < 8; i++) {
+// ===== PARTICLES FACTORY =====
+function spawnJumpParticles(x, y) {
+  for (let i = 0; i < 7; i++) {
     particles.push({
       x, y,
-      vx: (Math.random() - 0.5) * 6,
-      vy: Math.random() * -3,
-      radius: 3 + Math.random() * 2,
-      color,
+      vx: (Math.random() - 0.5) * 4,
+      vy: Math.random() * -2 - 1,
+      radius: 3 + Math.random() * 3,
+      color: '#e6edf3',
       life: 25,
       maxLife: 25,
+      alpha: 1
+    });
+  }
+}
+
+function spawnJumpPadParticles(x, y, color) {
+  for (let i = 0; i < 16; i++) {
+    particles.push({
+      x: x + (Math.random() - 0.5) * 60,
+      y,
+      vx: (Math.random() - 0.5) * 7,
+      vy: Math.random() * -9 - 4,
+      radius: 3 + Math.random() * 4,
+      color: Math.random() > 0.4 ? '#ff9900' : color,
+      life: 40,
+      maxLife: 40,
+      alpha: 1
+    });
+  }
+}
+
+function spawnTagParticles(x, y, color) {
+  for (let i = 0; i < 24; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const spd = 3 + Math.random() * 8;
+    particles.push({
+      x, y,
+      vx: Math.cos(angle) * spd,
+      vy: Math.sin(angle) * spd,
+      radius: 3 + Math.random() * 4,
+      color: Math.random() > 0.5 ? '#f85149' : color,
+      life: 45,
+      maxLife: 45,
       alpha: 1
     });
   }
@@ -967,12 +1136,12 @@ function spawnJumpParticles(x, y, color) {
 function spawnCollectParticles(x, y, color) {
   for (let i = 0; i < 14; i++) {
     const angle = Math.random() * Math.PI * 2;
-    const speed = 2 + Math.random() * 5;
+    const spd = 2 + Math.random() * 5;
     particles.push({
       x, y,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
-      radius: 4,
+      vx: Math.cos(angle) * spd,
+      vy: Math.sin(angle) * spd,
+      radius: 3 + Math.random() * 3,
       color,
       life: 30,
       maxLife: 30,
@@ -981,58 +1150,46 @@ function spawnCollectParticles(x, y, color) {
   }
 }
 
-function spawnTagParticles(x, y, color) {
-  for (let i = 0; i < 22; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const spd = 3 + Math.random() * 7;
-    particles.push({
-      x, y,
-      vx: Math.cos(angle) * spd,
-      vy: Math.sin(angle) * spd,
-      radius: 4 + Math.random() * 3,
-      color,
-      life: 36,
-      maxLife: 36,
-      alpha: 1
-    });
-  }
-}
-
-// ===== UI & MATCH FLOW =====
-function updateUI() {
+// ===== UI UPDATES =====
+function drawUI() {
   const mins = Math.floor(gameTime / 60);
   const secs = Math.floor(gameTime % 60);
   timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  timerEl.className = gameTime <= 10 ? 'warning' : '';
 
+  if (gameTime <= 10) timerEl.classList.add('warning');
+  else timerEl.classList.remove('warning');
+
+  // Roster badges
   playersInfo.innerHTML = '';
   players.forEach((p, idx) => {
-    const div = document.createElement('div');
     const isIt = idx === itIndex;
+    const div = document.createElement('div');
     div.className = `player-tag ${isIt ? 'it' : ''}`;
-    div.innerHTML = `<span class="indicator" style="background:${p.color}"></span> ${p.name} ${isIt ? '(IT!)' : ''}`;
+    div.innerHTML = `<span class="indicator" style="background:${p.color}"></span> ${p.name} ${isIt ? '🔥 IT' : ''}`;
     playersInfo.appendChild(div);
   });
 }
 
+// ===== GAME OVER =====
 function endGame() {
   gameOver = true;
   gameRunning = false;
+  ui.style.display = 'none';
+  hudEl.style.display = 'none';
+
   const loser = players[itIndex];
-  const winners = players.filter((_, idx) => idx !== itIndex);
+  const winners = players.filter((_, idx) => idx !== itIndex).map(p => p.name).join(', ');
 
-  let msg = `<span style="color:${loser.color}">${loser.name}</span> is tagged and loses!<br><br>`;
-  msg += `<span style="font-size:18px;color:#8b949e">Winners: ${winners.map(w => `<strong style="color:${w.color}">${w.name}</strong>`).join(', ')}</span>`;
-
-  winnerText.innerHTML = msg;
+  winnerText.innerHTML = `
+    <div style="color:#f85149;margin-bottom:8px">${loser.name} IS CAUGHT (LOST)!</div>
+    <div style="color:#3fb950;font-size:22px">Winners: ${winners}</div>
+  `;
   gameoverEl.style.display = 'flex';
 }
 
 function restartMatch() {
   gameoverEl.style.display = 'none';
   menu.style.display = 'flex';
-  ui.style.display = 'none';
-  hudEl.style.display = 'none';
 }
 </script>
 </body>
